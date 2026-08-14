@@ -354,11 +354,11 @@
                             </div>
                             <button class="btn btn-outline-secondary btn-sm fw-bold filter-item" onclick="openColSettings('ro')" style="max-width: max-content;"><i class="fa-solid fa-table-columns"></i> Cột</button>
                             
-                            <div class="ms-auto d-flex gap-1 align-items-center flex-wrap filter-item justify-content-md-end">
+							<div class="ms-auto d-flex gap-1 align-items-center flex-wrap filter-item justify-content-md-end">
                                 <button class="btn btn-outline-success fw-bold shadow-sm btn-sm px-2 text-nowrap" onclick="downloadExcelTemplate('ro')"><i class="fa-solid fa-download"></i> MẪU</button>
                                 <button class="btn btn-outline-primary fw-bold shadow-sm btn-sm px-2 text-nowrap" onclick="document.getElementById('excel-upload-input').click()"><i class="fa-solid fa-upload"></i> UPLOAD</button>
+                                <button class="btn btn-outline-warning fw-bold shadow-sm btn-sm px-2 text-nowrap" onclick="openCopyDateModal()"><i class="fa-solid fa-copy"></i> COPY</button>
                                 <button class="btn btn-bim fw-bold shadow-sm btn-sm px-3 text-nowrap" onclick="submitRegOthersGrid()"><i class="fa-solid fa-save"></i> LƯU</button>
-                                <button class="btn btn-outline-success fw-bold shadow-sm btn-sm px-2 text-nowrap" onclick="openCopyDateModal()"><i class="fa-solid fa-copy"></i> COPY</button>
                             </div>
                         </div>
                         <div class="d-flex flex-wrap gap-2 mb-2 justify-content-center justify-content-md-start">
@@ -805,7 +805,26 @@
     </div>
 </div>
 <!-- CÁC MODALS -->
-
+<!-- Modal Copy Ngày -->
+<div class="modal fade" id="copyDateModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success text-white">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa-copy"></i> Copy sang ngày khác</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <label class="fw-bold small mb-2 text-primary">Chọn ngày đích để dán:</label>
+                <input type="text" id="copy-target-date" class="form-control border-primary text-center fw-bold flatpickr-date" placeholder="dd/mm/yyyy">
+                <p class="small text-muted mt-2 mb-0">Hệ thống sẽ copy <b>TOÀN BỘ</b> lựa chọn suất ăn của danh sách hiện tại sang ngày đích.</p>
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success btn-sm fw-bold shadow-sm" onclick="submitCopyDate()"><i class="fa-solid fa-check"></i> XÁC NHẬN COPY</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Modal Xuất Excel & In Nhanh Dashboard -->
 <div class="modal fade" id="dashExportPrintModal" tabindex="-1">
     <div class="modal-dialog">
@@ -3142,8 +3161,8 @@
             let selLu = buildSel('ms-lu', luVal, locks.lu, dDisplay);
             let selDi = buildSel('ms-di', diVal, locks.di, dDisplay);
             let selOt = buildSel('ms-ot ot-select', otVal, locks.ot, dDisplay);
-            let inpNote = isAllLocked ? `<textarea class="form-control form-control-sm border-0 meal-note" rows="1" disabled>${noteVal}</textarea>` : `<textarea class="form-control form-control-sm border-secondary meal-note" rows="1" onblur="cacheRow(this, '${mnv}', '${dDisplay}')">${noteVal}</textarea>`;
-
+			let escapedNote = String(noteVal).replace(/"/g, '&quot;');
+            let inpNote = isAllLocked ? `<input type="text" class="form-control form-control-sm border-0 meal-note" disabled value="${escapedNote}">` : `<input type="text" class="form-control form-control-sm border-secondary meal-note" value="${escapedNote}" onblur="cacheRow(this, '${mnv}', '${dDisplay}')">`;
             html.push(`<tr class="${rowClass}" data-date="${dDisplay}" data-mnv="${mnv}"><td class="fw-bold align-middle ${isAllLocked?'text-muted':''}">${dDisplay}<br>${hol?`<small class="text-success fw-bold">${hol.name}</small>`:''}</td><td class="align-middle fw-bold ${isSun?'text-danger':(hol?'text-success':'')}">${wDays[loop.getDay()]}</td><td class="align-middle">${selBf}</td><td class="align-middle">${selLu}</td><td class="align-middle">${selDi}</td><td class="align-middle ot-col">${selOt}</td><td class="align-middle">${inpNote}</td><td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="clearMealRow(this, '${mnv}', '${dDisplay}')" title="Xóa chọn dòng này"><i class="fa-solid fa-trash"></i></button></td></tr>`); loop.setDate(loop.getDate() + 1);
         }
         tbody.innerHTML = html.join(''); enforceOtSelectPermission();
@@ -3315,8 +3334,13 @@
             let selLu = buildSel('ms-lu', luVal, locks.lu, mnv, dDisplay);
             let selDi = buildSel('ms-di', diVal, locks.di, mnv, dDisplay);
             let selOT = buildSel('ms-ot ot-select', otVal, locks.ot, mnv, dDisplay);
-            let inpNote = locks.all ? `<textarea class="form-control form-control-sm border-0 meal-note" rows="1" disabled>${noteVal}</textarea>` : `<textarea class="form-control form-control-sm meal-note border-secondary" rows="1" onblur="cacheRow(this, '${mnv}', '${dDisplay}', false)">${noteVal}</textarea>`;
+// Xử lý ký tự đặc biệt để hiển thị đúng định dạng có xuống dòng
+            let escapedNote = String(noteVal).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
             
+            // Dùng textarea có onfocus mở rộng ra 3 dòng, onblur thu lại 1 dòng để chống lag
+            let inpNote = locks.all 
+                ? `<textarea class="form-control form-control-sm border-0 meal-note" rows="1" disabled style="resize: none; overflow: hidden;">${escapedNote}</textarea>` 
+                : `<textarea class="form-control form-control-sm meal-note border-secondary" rows="1" style="resize: vertical; transition: all 0.2s;" onfocus="this.rows=3" onblur="this.rows=1; cacheRow(this, '${mnv}', '${dDisplay}', false)">${escapedNote}</textarea>`;
             html.push(`<tr class="${trClass}" data-mnv="${mnv}" data-name="${e.name}"><td>${c++}</td>${buildTbodyCols('ro', e, false)}<td class="align-middle">${selBf}</td><td class="align-middle">${selLu}</td><td class="align-middle">${selDi}</td><td class="align-middle ot-col">${selOT}</td><td class="align-middle">${inpNote}</td><td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="clearMealRow(this, '${mnv}', '${dDisplay}', false)" title="Xóa chọn dòng này"><i class="fa-solid fa-trash"></i></button></td></tr>`);
         });
         tbody.innerHTML = html.length > 0 ? html.join('') : `<tr><td colspan="${(userCols['ro']||[]).length + 6}" class="text-center text-muted">Không tìm thấy NV</td></tr>`; enforceOtSelectPermission();
@@ -3382,8 +3406,8 @@
             let selLu = buildSel('ms-lu border-danger', luVal, false, mnv, dDisplay);
             let selDi = buildSel('ms-di border-danger', diVal, false, mnv, dDisplay);
             let selOT = buildSel('ms-ot border-danger ot-select', otVal, false, mnv, dDisplay);
-            let inpNote = `<textarea class="form-control form-control-sm meal-note border-danger" rows="1" onblur="cacheRow(this, '${mnv}', '${dDisplay}', true)">${noteVal}</textarea>`;
-            
+			let escapedNote = String(noteVal).replace(/"/g, '&quot;');
+            let inpNote = `<input type="text" class="form-control form-control-sm meal-note border-danger" value="${escapedNote}" onblur="cacheRow(this, '${mnv}', '${dDisplay}', true)">`;            
             html.push(`<tr class="${trClass}" data-mnv="${mnv}" data-name="${e.name}"><td>${c++}</td>${buildTbodyCols('adj', e, false)}<td class="align-middle">${selBf}</td><td class="align-middle">${selLu}</td><td class="align-middle">${selDi}</td><td class="align-middle ot-col">${selOT}</td><td class="align-middle">${inpNote}</td><td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="clearMealRow(this, '${mnv}', '${dDisplay}', true)" title="Về 0"><i class="fa-solid fa-trash"></i></button></td></tr>`);
         });
         tbody.innerHTML = html.length > 0 ? html.join('') : `<tr><td colspan="${(userCols['adj']||[]).length + 6}" class="text-center text-muted">Không tìm thấy NV</td></tr>`; enforceOtSelectPermission();
