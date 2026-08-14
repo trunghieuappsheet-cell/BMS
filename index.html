@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1280">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta property="og:title" content="BIM MEAL MANAGEMENT">
     <meta property="og:description" content="Phần mềm đăng ký suất ăn">
     <meta property="og:image" content="https://bmms.hama.io.vn/logo.png">
@@ -149,8 +149,14 @@
                 <img src="https://lh3.googleusercontent.com/d/18DgW1i6MtUKwa1pfHG92FxBZ6J_yA1MW" alt="Logo" style="height: 30px;">
                 <h5 class="fw-bold text-bim m-0 lh-1" style="font-size: 1.15rem;">BIM MEAL MANAGEMENT</h5>
             </div>
-            <div class="mb-3"><label class="form-label fw-bold text-muted small">MÃ NHÂN VIÊN</label><input type="text" id="login-mnv" class="form-control form-control-lg" placeholder="BIM0123"></div>
-            <div class="mb-3"><label class="form-label fw-bold text-muted small">MẬT KHẨU</label><input type="password" id="login-pass" class="form-control form-control-lg" placeholder="Nhập mật khẩu"></div>
+            <div class="mb-3">
+                <label class="form-label fw-bold text-muted small">MÃ NHÂN VIÊN</label>
+                <input type="text" id="login-mnv" class="form-control form-control-lg" placeholder="BIM0123">
+            </div>			
+            <div class="mb-3">
+                <label class="form-label fw-bold text-muted small">MẬT KHẨU</label>
+                <input type="password" id="login-pass" class="form-control form-control-lg" placeholder="Nhập mật khẩu">
+            </div>
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="form-check"><input class="form-check-input border-secondary" type="checkbox" id="remember-me" checked><label class="form-check-label fw-bold text-muted small" for="remember-me">Ghi nhớ đăng nhập</label></div>
                 <a href="#" class="text-decoration-none small fw-bold text-bim" onclick="toggleForgotPass(true)">Quên mật khẩu?</a>
@@ -187,6 +193,14 @@
 
             <div class="d-flex align-items-center gap-2 ms-auto mt-2 mt-lg-0">
                 <div class="text-end border-end pe-2" id="header-countdown" style="min-width: 100px;"></div>
+                
+                <div class="mx-1 position-relative">
+                    <button class="btn btn-outline-success btn-sm rounded-circle position-relative" onclick="manualSyncNow()" title="Đồng bộ dữ liệu" style="width: 35px; height: 35px;">
+                        <i id="manual-sync-icon" class="fa-solid fa-rotate"></i>
+                        <span id="manual-sync-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6em; display: none;">0</span>
+                    </button>
+                </div>
+
                 <div class="dropdown mx-1 position-relative">
                     <button class="btn btn-outline-secondary btn-sm rounded-circle position-relative" data-bs-toggle="dropdown" onclick="markRead()" title="Thông báo" style="width: 35px; height: 35px;">
                         <i id="bell-icon" class="fa-solid fa-bell"></i><span id="notif-badge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none"></span>
@@ -223,7 +237,7 @@
                         <div class="tab-content">
                             <!-- CHẾ ĐỘ LỊCH -->
                             <div class="tab-pane fade show active" id="mode-vcal">
-								<div class="d-flex align-items-center gap-3 mb-3 bg-light p-2 rounded border shadow-sm w-100 justify-content-center position-relative">
+								<div class="d-flex align-items-center gap-3 mb-3 bg-light p-2 rounded border shadow-sm w-100 justify-content-center position-relative flex-wrap">
 									<button class="btn btn-outline-secondary fw-bold bg-white btn-sm" onclick="changeRegCycle(-1)"><i class="fa-solid fa-chevron-left"></i> TRƯỚC</button>
 									<h5 class="m-0 fw-bold text-bim px-2 px-md-4 fs-6 fs-md-5" id="vcal-cycle-title">Kỳ: ...</h5>
 									<button class="btn btn-outline-secondary fw-bold bg-white btn-sm" onclick="changeRegCycle(1)">TỚI <i class="fa-solid fa-chevron-right"></i></button>
@@ -277,7 +291,7 @@
                                         <button class="btn btn-sm btn-outline-secondary rounded-start-0 border-secondary px-2" onclick="changeDateStep('mc', 1)"><i class="fa-solid fa-chevron-right"></i></button>
                                     </div>
                                     
-								<div class="ms-auto d-flex gap-2">
+								<div class="ms-auto d-flex gap-2 flex-wrap">
 									<button class="btn fw-bold shadow-sm btn-sm px-2 text-nowrap" style="background-color: #ff9800; border: 2px solid #e68a00; color: white;" onclick="openMealCostModal()" title="Chi tiết tiền ăn">
 										<i class="fa-solid fa-file-invoice-dollar text-white"></i>
 									</button>
@@ -379,24 +393,31 @@
                                 <ul class="dropdown-menu shadow p-2" id="filter-bpgoc-unreg" onclick="event.stopPropagation()" style="min-width: 280px; max-height: 300px; overflow-y: auto;"></ul>
                             </div>
                             <div class="dropdown filter-item">
-                                <button class="btn btn-outline-secondary dropdown-toggle btn-sm bg-white text-dark border-secondary w-100 text-start" type="button" data-bs-toggle="dropdown">Tình trạng</button>
+                                <button class="btn btn-outline-secondary dropdown-toggle btn-sm bg-white text-dark border-secondary w-100 text-start" type="button" data-bs-toggle="dropdown">Tình trạng</button>					
                                 <ul class="dropdown-menu shadow p-2" id="filter-status-unreg" onclick="event.stopPropagation()">
                                     <li><label class="form-check-label w-100"><input type="checkbox" class="form-check-input status-cb me-2" value="Đang làm việc" checked onchange="renderUnregistered()"> Đang làm việc</label></li>
                                     <li><label class="form-check-label w-100"><input type="checkbox" class="form-check-input status-cb me-2" value="Đã nghỉ" onchange="renderUnregistered()"> Đã nghỉ</label></li>
                                 </ul>
                             </div>
+							<select id="unreg-group-by" class="form-select form-select-sm border-secondary fw-bold filter-item text-dark" onchange="renderUnregistered()" style="width: auto;">
+                                <option value="bp_goc">BP Chấm công</option>
+                                <option value="dv">Đơn vị</option>
+                                <option value="bp1">BP Cấp 1</option>
+                                <option value="dept_cap2" selected>BP Cấp 2</option>
+                                <option value="bp3">BP Cấp 3</option>
+                                <option value="bp4">BP Cấp 4</option>
+                                <option value="bp5">BP Cấp 5</option>
+                            </select>							
                         </div>
                         <div class="card shadow-sm mb-3 border-0 bg-white rounded">
                             <div class="card-body">
-                                <h6 class="fw-bold text-danger text-center"><i class="fa-solid fa-chart-bar"></i> BIỂU ĐỒ SỐ LƯỢNG ĐĂNG KÝ / CHƯA ĐĂNG KÝ</h6>
                                 <div style="height: 65vh; width: 100%;"><canvas id="unregChart"></canvas></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- TAB 2: BÁO CÁO (MỚI) -->
+<!-- TAB 2: BÁO CÁO (MỚI) -->
             <div id="view-reports" class="page-view d-none">
                 <div class="toolbar-filter">
                     <input type="text" id="rep-search" class="form-control form-control-sm border-primary filter-item search-input" placeholder="Tìm kiếm..." onkeyup="debounceSearch(renderReports, 100)">
@@ -429,7 +450,7 @@
 
                     <button class="btn btn-outline-secondary btn-sm fw-bold filter-item" onclick="openColSettings('rep')" style="max-width: max-content;"><i class="fa-solid fa-table-columns"></i> Cột</button>
                     
-                    <div class="ms-auto d-flex gap-2">
+                    <div class="ms-auto d-flex gap-2 flex-wrap">
                         <select id="rep-export-type" class="form-select form-select-sm border-success fw-bold filter-item text-success" style="width: auto;">
                             <option value="DETAIL">Bản chi tiết</option>
                             <option value="COMPACT">Bản gọn</option>
@@ -479,8 +500,11 @@
                         </ul>
                     </div>
                     <button class="btn btn-outline-secondary btn-sm fw-bold filter-item" onclick="openColSettings('dash')" style="max-width: max-content;"><i class="fa-solid fa-table-columns"></i> Cột</button>
-                </div>
-                
+                    
+                    <div class="ms-auto d-flex gap-2 flex-wrap">
+                        <button class="btn btn-outline-success btn-sm fw-bold filter-item shadow-sm" onclick="openPrintExportModal()"><i class="fa-solid fa-print"></i> Xuất / In nhanh</button>
+                    </div>
+                </div>                
                 <div class="row text-center mb-3 g-3">
                     <div class="col-6 col-md-3"><div class="card dash-card text-white p-2 p-md-3 shadow-sm h-100" style="background-color: #0d6efd;"><i class="fa-solid fa-mug-saucer"></i><h6 class="fw-bold text-uppercase opacity-75 m-0" style="letter-spacing:1px;">TỔNG SÁNG</h6><div class="dash-stat" id="dash-sang">0</div><div class="dash-sub d-flex gap-2 justify-content-center"><span class="badge bg-white text-primary px-2 py-1 fs-6 shadow-sm">BT: <span id="dash-sang-bt" class="fs-5">0</span></span><span class="badge bg-white text-danger px-2 py-1 fs-6 shadow-sm">HY: <span id="dash-sang-hy" class="fs-5">0</span></span></div></div></div>
                     <div class="col-6 col-md-3"><div class="card dash-card text-white p-2 p-md-3 shadow-sm h-100" style="background-color: #198754;"><i class="fa-solid fa-bowl-rice"></i><h6 class="fw-bold text-uppercase opacity-75 m-0" style="letter-spacing:1px;">TỔNG TRƯA</h6><div class="dash-stat" id="dash-trua">0</div><div class="dash-sub d-flex gap-2 justify-content-center"><span class="badge bg-white text-primary px-2 py-1 fs-6 shadow-sm">BT: <span id="dash-trua-bt" class="fs-5">0</span></span><span class="badge bg-white text-danger px-2 py-1 fs-6 shadow-sm">HY: <span id="dash-trua-hy" class="fs-5">0</span></span></div></div></div>
@@ -541,8 +565,7 @@
                     </table>
                 </div>
             </div>
-
-            <!-- TAB 5: QUẢN LÝ NHÂN SỰ -->
+<!-- TAB 5: QUẢN LÝ NHÂN SỰ -->
             <div id="view-employees" class="page-view d-none">
                 <div class="toolbar-filter">
                     <input type="text" id="emp-search" class="form-control form-control-sm border-primary filter-item search-input" placeholder="Tìm tên, mã NV..." onkeyup="debounceSearch(filterEmployees, 100)">
@@ -658,9 +681,9 @@
                     </div>
                     
                     <div class="col-md-6">
-                        <div class="card shadow-sm h-100 border-0">
+                        <div class="card shadow-sm border-0 mb-4">
                             <div class="card-header fw-bold bg-warning"><i class="fa-solid fa-calendar-star"></i> Quản lý Lễ / Tết</div>
-                            <div class="card-body bg-light p-3">
+                            <div class="card-body bg-light p-3" style="max-height: 400px; overflow-y: auto;">
                                 <div class="row g-2 mb-3">
                                     <div class="col-12"><label class="small fw-bold">Thêm mới / Cập nhật ngày Lễ</label></div>
                                     <div class="col-4"><input type="text" id="hol-date" class="form-control form-control-sm border-warning fw-bold text-center flatpickr-date" placeholder="dd/mm/yyyy"></div>
@@ -670,6 +693,31 @@
                                 <ul class="list-group list-group-flush border rounded" id="holiday-list"></ul>
                             </div>
                         </div>
+                        
+                        <!-- CARD MỚI: CẤU HÌNH ĐỒNG BỘ REALTIME -->
+                        <div class="card shadow-sm border-0 admin-full-only">
+                            <div class="card-header fw-bold bg-info text-dark"><i class="fa-solid fa-rotate"></i> Cấu hình Đồng bộ Realtime</div>
+                            <div class="card-body bg-light">
+                                <p class="text-muted small mb-3">Thiết lập thời gian tự động đồng bộ (giây) cho từng quyền. Nhập <b>0</b> để tắt tự động đồng bộ (chỉ dùng nút đồng bộ thủ công trên góc phải).</p>
+                                <div class="row g-2 align-items-center mb-2">
+                                    <div class="col-5 fw-bold text-dark small">Admin_full:</div>
+                                    <div class="col-7"><div class="input-group input-group-sm"><input type="number" id="sync-admin-full" class="form-control text-center fw-bold text-primary" value="30"><span class="input-group-text bg-white">giây</span></div></div>
+                                    
+                                    <div class="col-5 fw-bold text-dark small">Admin_BP:</div>
+                                    <div class="col-7"><div class="input-group input-group-sm"><input type="number" id="sync-admin-bp" class="form-control text-center fw-bold text-primary" value="30"><span class="input-group-text bg-white">giây</span></div></div>
+                                    
+                                    <div class="col-5 fw-bold text-dark small">Hành chính bộ phận:</div>
+                                    <div class="col-7"><div class="input-group input-group-sm"><input type="number" id="sync-hcbp" class="form-control text-center fw-bold text-primary" value="30"><span class="input-group-text bg-white">giây</span></div></div>
+                                    
+                                    <div class="col-5 fw-bold text-dark small">Bep_An:</div>
+                                    <div class="col-7"><div class="input-group input-group-sm"><input type="number" id="sync-bep" class="form-control text-center fw-bold text-primary" value="30"><span class="input-group-text bg-white">giây</span></div></div>
+                                    
+                                    <div class="col-5 fw-bold text-dark small">Nhan_Vien:</div>
+                                    <div class="col-7"><div class="input-group input-group-sm"><input type="number" id="sync-nhanvien" class="form-control text-center fw-bold text-secondary" value="0"><span class="input-group-text bg-white">giây</span></div></div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -730,12 +778,14 @@
                                     </div>
                                     <div class="col-md-12">
                                         <label class="fw-bold small text-danger">3. Tính năng được phép (Ghi đè mặc định):</label>
-                                        <div class="border bg-white p-2 rounded shadow-sm">
-                                            <label class="d-inline-block me-3"><input type="checkbox" class="perm-feat-cb form-check-input" value="reg_others"> Đăng ký hộ</label>
-                                            <label class="d-inline-block me-3"><input type="checkbox" class="perm-feat-cb form-check-input" value="unreg"> Chưa đăng ký</label>
-                                            <label class="d-inline-block me-3"><input type="checkbox" class="perm-feat-cb form-check-input" value="dash"> Dashboard</label>
-                                            <label class="d-inline-block me-3"><input type="checkbox" class="perm-feat-cb form-check-input" value="emp"> Nhân sự</label>
-                                            <label class="d-inline-block me-3"><input type="checkbox" class="perm-feat-cb form-check-input" value="settings"> Thiết lập</label>
+                                        <div class="border bg-white p-2 rounded shadow-sm d-flex flex-wrap gap-2">
+                                            <label class="d-inline-block"><input type="checkbox" class="perm-feat-cb form-check-input" value="reg_others"> Đăng ký hộ</label>
+                                            <label class="d-inline-block"><input type="checkbox" class="perm-feat-cb form-check-input" value="unreg"> Chưa đăng ký</label>
+                                            <label class="d-inline-block"><input type="checkbox" class="perm-feat-cb form-check-input" value="dash"> Dashboard</label>
+                                            <label class="d-inline-block"><input type="checkbox" class="perm-feat-cb form-check-input" value="rep"> Báo cáo</label>
+                                            <label class="d-inline-block"><input type="checkbox" class="perm-feat-cb form-check-input" value="adj"> Hiệu chỉnh</label>
+                                            <label class="d-inline-block"><input type="checkbox" class="perm-feat-cb form-check-input" value="emp"> Nhân sự</label>
+                                            <label class="d-inline-block"><input type="checkbox" class="perm-feat-cb form-check-input" value="settings"> Thiết lập</label>
                                         </div>
                                     </div>
                                 </div>
@@ -754,17 +804,53 @@
         </div>
     </div>
 </div>
-
 <!-- CÁC MODALS -->
-<!-- Modal Copy Ngày -->
-<div class="modal fade" id="copyDateModal" tabindex="-1">
-    <div class="modal-dialog modal-sm">
+
+<!-- Modal Xuất Excel & In Nhanh Dashboard -->
+<div class="modal fade" id="dashExportPrintModal" tabindex="-1">
+    <div class="modal-dialog">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white"><h5 class="modal-title fw-bold"><i class="fa-solid fa-copy"></i> Copy Ngày Ăn</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header bg-success text-white">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa-print"></i> Xuất / In Dashboard</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
             <div class="modal-body p-3">
-                <label class="fw-bold small text-muted">Copy cho ngày</label>
-                <input type="text" id="copy-target-date" class="form-control flatpickr-date mt-2 text-center fw-bold" placeholder="dd/mm/yyyy">
-                <button class="btn btn-bim w-100 fw-bold shadow text-white mt-3" onclick="submitCopyDate()">Xác Nhận</button>
+                <label class="fw-bold small text-primary mb-2">Chọn Bếp (Loại suất ăn):</label>
+                <div class="d-flex flex-wrap gap-2 mb-3 border p-2 rounded bg-light">
+                    <label class="btn btn-outline-primary btn-sm"><input type="checkbox" id="dep-kit-bt" value="X" checked class="form-check-input me-1"> Bãi Trường (X)</label>
+                    <label class="btn btn-outline-danger btn-sm"><input type="checkbox" id="dep-kit-hy" value="Y" checked class="form-check-input me-1"> Hyatt (Y)</label>
+                </div>
+
+                <label class="fw-bold small text-primary mb-2">Chọn buổi ăn xuất/in:</label>
+                <div class="d-flex flex-wrap gap-2 mb-3 border p-2 rounded bg-light">
+                    <label class="btn btn-outline-secondary btn-sm"><input type="checkbox" id="dep-bf" checked class="form-check-input me-1"> Sáng</label>
+                    <label class="btn btn-outline-secondary btn-sm"><input type="checkbox" id="dep-lu" checked class="form-check-input me-1"> Trưa</label>
+                    <label class="btn btn-outline-secondary btn-sm"><input type="checkbox" id="dep-di" checked class="form-check-input me-1"> Chiều</label>
+                    <label class="btn btn-outline-secondary btn-sm"><input type="checkbox" id="dep-ot" checked class="form-check-input me-1"> Tăng ca</label>
+                </div>
+
+                <label class="fw-bold small text-primary mb-2">Cột thông tin hiển thị:</label>
+                <div class="small mb-2 text-muted fst-italic">Tích chọn các cột muốn xuất/in:</div>
+                <div id="dep-col-container" class="d-flex flex-wrap gap-2 mb-3 border p-2 rounded bg-light" style="max-height: 150px; overflow-y: auto;">
+                    <!-- Checkbox cột render qua JS -->
+                </div>
+
+                <label class="fw-bold small text-primary mb-2">Hướng in (Áp dụng cho In nhanh):</label>
+                <div class="d-flex gap-3 mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input border-secondary" type="radio" name="printOrientation" id="print-landscape" value="landscape" checked>
+                        <label class="form-check-label small fw-bold text-dark" for="print-landscape"><i class="fa-solid fa-file-image"></i> Giấy Ngang</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input border-secondary" type="radio" name="printOrientation" id="print-portrait" value="portrait">
+                        <label class="form-check-label small fw-bold text-dark" for="print-portrait"><i class="fa-solid fa-file-lines"></i> Giấy Dọc</label>
+                    </div>
+                </div>
+                
+                <div class="row g-2">
+                    <div class="col-6"><button class="btn btn-outline-success w-100 fw-bold shadow-sm" onclick="exportDashboardExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button></div>
+                    <div class="col-6"><button class="btn btn-outline-primary w-100 fw-bold shadow-sm" onclick="printDashboard()"><i class="fa-solid fa-print"></i> In nhanh</button></div>
+                </div>
             </div>
         </div>
     </div>
@@ -772,8 +858,10 @@
 
 <!-- Modal Thông tin Tài khoản -->
 <div class="modal fade" id="accountInfoModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content profile-card shadow-lg">
+    <!-- Thêm mt-5 và pt-3 để đẩy toàn bộ modal xuống -->
+    <div class="modal-dialog mt-5 pt-3">
+        <!-- Thêm mt-4 để chừa không gian cho Avatar trồi lên không bị lẹm -->
+        <div class="modal-content profile-card shadow-lg mt-4">
             <div class="modal-header border-0 pb-0">
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -879,24 +967,29 @@
 <div class="modal fade" id="empModal" tabindex="-1">
   <div class="modal-dialog modal-xl">
     <div class="modal-content border-0 shadow-lg">
-      <div class="modal-header bg-bim text-white"><h5 class="modal-title fw-bold">Thông tin Nhân Sự</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+      <div class="modal-header bg-bim text-white">
+          <h5 class="modal-title fw-bold">Thông tin Nhân Sự</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
       <div class="modal-body">
         <ul class="nav nav-tabs fw-bold mb-3 d-none" id="emp-type-tabs">
             <li class="nav-item"><a class="nav-link active text-bim" href="#" onclick="changeEmpType('NORMAL', this); return false;">Nhân viên BIM</a></li>
             <li class="nav-item"><a class="nav-link text-muted" href="#" onclick="changeEmpType('CONG_TAC', this); return false;">Công tác</a></li>
             <li class="nav-item"><a class="nav-link text-muted" href="#" onclick="changeEmpType('GUEST', this); return false;">Khách ngoài</a></li>
         </ul>
+        
+        <!-- FORM DÀNH CHO NHÂN VIÊN BIM (NHẬP ĐƠN LẺ) -->
         <form id="emp-form">
             <div class="row g-3 align-items-center">
-                <div class="col-md-3 emp-field emp-field-ct"><label class="fw-bold small">Mã NV (*)</label><input type="text" class="form-control border-primary" id="mod-mnv" required></div>
-                <div class="col-md-4 emp-field emp-field-ct emp-field-guest"><label class="fw-bold small">Họ tên (*)</label><input type="text" class="form-control border-primary" id="mod-name" required></div>
-                <div class="col-md-3 emp-field emp-field-ct"><label class="fw-bold small">SĐT (*)</label><input type="text" class="form-control border-primary" id="mod-phone"></div>
+                <div class="col-md-3 emp-field"><label class="fw-bold small">Mã NV (*)</label><input type="text" class="form-control border-primary" id="mod-mnv" required></div>
+                <div class="col-md-4 emp-field"><label class="fw-bold small">Họ tên (*)</label><input type="text" class="form-control border-primary" id="mod-name" required></div>
+                <div class="col-md-3 emp-field"><label class="fw-bold small">SĐT (*)</label><input type="text" class="form-control border-primary" id="mod-phone"></div>
                 <div class="col-md-2 emp-field"><label class="fw-bold small">Giới tính</label><input type="text" class="form-control border-primary" id="mod-gender" list="list-gender"></div>
                 <div class="col-md-3 emp-field"><label class="fw-bold small">CCCD (Mật khẩu)</label><input type="text" class="form-control border-primary" id="mod-cccd"></div>
                 <div class="col-md-4 emp-field"><label class="fw-bold small">Email công ty</label><input type="text" class="form-control border-primary" id="mod-email"></div>
                 <div class="col-md-3 emp-field"><label class="fw-bold small">Chức danh</label><input type="text" class="form-control border-primary" id="mod-title" list="list-title"></div>
                 
-                <div class="col-md-3 emp-field emp-field-ct"><label class="fw-bold small text-primary">Đơn vị / Công ty</label><input type="text" class="form-control border-primary" id="mod-company" list="list-company"></div>
+                <div class="col-md-3 emp-field"><label class="fw-bold small text-primary">Đơn vị / Công ty</label><input type="text" class="form-control border-primary" id="mod-company" list="list-company"></div>
                 <div class="col-md-3 emp-field"><label class="fw-bold small text-primary">Khối/Phân ban (Cột H)</label><input type="text" class="form-control border-primary" id="mod-dv" list="list-dv"></div>
                 
                 <div class="col-md-3 emp-field"><label class="fw-bold small">BP Cấp 1</label><input type="text" class="form-control border-primary" id="mod-bp1" list="list-dept"></div>
@@ -904,7 +997,7 @@
                 <div class="col-md-3 emp-field"><label class="fw-bold small">Bộ phận Cấp 3</label><input type="text" class="form-control border-primary" id="mod-bp3" list="list-dept"></div>
                 <div class="col-md-3 emp-field"><label class="fw-bold small">Bộ phận Cấp 4</label><input type="text" class="form-control border-primary" id="mod-bp4" list="list-dept"></div>
                 <div class="col-md-3 emp-field"><label class="fw-bold small">Bộ phận Cấp 5</label><input type="text" class="form-control border-primary" id="mod-bp5" list="list-dept"></div>
-                <div class="col-md-3 emp-field emp-field-ct"><label class="fw-bold small">BP Chấm công gốc</label><input type="text" class="form-control border-primary" id="mod-bp_goc" list="list-bpgoc"></div>
+                <div class="col-md-3 emp-field"><label class="fw-bold small">BP Chấm công gốc</label><input type="text" class="form-control border-primary" id="mod-bp_goc" list="list-bpgoc"></div>
                 
                 <div class="col-md-3 emp-field"><label class="fw-bold small text-success">Ngày gia nhập</label><input type="text" class="form-control border-secondary flatpickr-date" id="mod-join" placeholder="dd/mm/yyyy"></div>
                 
@@ -914,8 +1007,39 @@
             </div>
             <div class="small text-muted mt-3 fst-italic">Lưu ý: Nếu nhập dữ liệu vào ô "Ngày nghỉ", tình trạng sẽ tự động chuyển thành "Đã nghỉ".</div>
         </form>
+
+        <!-- BẢNG DÀNH RIÊNG CHO CÔNG TÁC & KHÁCH (NHẬP HÀNG LOẠT) -->
+        <div id="emp-congtac-container" class="d-none">
+            <div class="table-responsive" style="max-height: 50vh; overflow-y: auto;">
+                <table class="table table-bordered table-hover table-sm align-middle text-center text-nowrap mb-0">
+                    <thead class="table-light position-sticky top-0 z-1 shadow-sm">
+                        <tr>
+                            <th style="min-width: 120px;">Mã NV (*)</th>
+                            <th style="min-width: 200px;">Họ tên (*)</th>
+                            <th style="min-width: 120px;">SĐT (*)</th>
+                            <th style="min-width: 150px;">Công ty</th>
+                            <th style="min-width: 150px;">BP chấm công</th>
+                            <th style="width: 50px;">Xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="congtac-tbody"></tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <button class="btn btn-sm btn-success fw-bold shadow-sm" onclick="addCongTacRow()"><i class="fa-solid fa-plus"></i> Thêm Dòng Nhập</button>
+                <span class="small text-muted fst-italic" id="ct-hint">Lưu ý: BP Cấp 2 sẽ được gán tự động là "Công tác". Mật khẩu là SĐT.</span>
+            </div>
+        </div>
+        <div id="emp-guest-container" class="d-none mt-2">
+            <label class="fw-bold small text-primary mb-2">Nhập danh sách Khách ngoài (Mỗi khách 1 dòng, hoặc cách nhau bằng dấu phẩy, chấm phẩy):</label>
+            <textarea id="guest-list-input" class="form-control border-primary" rows="10" placeholder="Nguyễn Văn A&#10;Trần Thị B&#10;Lê Văn C..."></textarea>
+            <span class="small text-muted fst-italic mt-2 d-block"><i class="fa-solid fa-circle-info"></i> Lưu ý: Hệ thống sẽ tự động gán BP Cấp 2 là "Khách ngoài BIM" và tự động sinh Mã NV duy nhất.</span>
+        </div>
       </div>
-      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="button" class="btn btn-bim fw-bold px-4 shadow" onclick="saveEmployee()">Lưu Dữ Liệu</button></div>
+      <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-bim fw-bold px-4 shadow" onclick="saveEmployee()">Lưu Dữ Liệu</button>
+      </div>
     </div>
   </div>
 </div>
@@ -969,9 +1093,9 @@
 <input type="file" id="excel-upload-input" accept=".xlsx, .xls" class="d-none" onchange="handleExcelUpload(event, 'ro')">
 <input type="file" id="hc-upload-input" accept=".xlsx, .xls" class="d-none" onchange="handleExcelUpload(event, 'adj')">
 <input type="file" id="emp-excel-upload-input" accept=".xlsx, .xls" class="d-none" onchange="handleEmployeeExcelUpload(event)">
-<div id="toast-container"></div>
+<div id="toast-container"></div>			
 <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwfhkLiC_Df8OCDgMSIPpsds2OpWQu5lYyhsMlYvSc-XlmG-E4s251_4Mw2avNoodis/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxjgFdfDZ9WJPHOmhKuB6s3rteuazmJz4RlEwXm-pKObi1E0aPZqsuR3EsTtR0ABFsJ/exec';
     let currentUser = null, dashboardData = [], employeeData = [], holidaysData = [], appSettings = {}, hcData = [];
     let currentCycleOffset = 0, searchTimeout, realtimeTimer;
     let selectedVcalDates = new Set(), unregChartInstance = null, unregDataCache = {}, currentUnregDept = ""; 
@@ -982,7 +1106,55 @@
     let tempAdjustCache = {};
 
     let apiQueue = [], isSyncing = false, simInt;
-    function enqueueTask(payload, msg, onSuccess, onFail) { apiQueue.push({ payload, msg, onSuccess, onFail }); processApiQueue(); }
+
+    // 1. TẠO ID DUY NHẤT CHO MỖI REQUEST (Chống trùng lặp)
+    function generateReqId() {
+        return 'REQ_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+// 2. HÀM GỌI API TRUNG TÂM
+    async function fetchAPI(payload) {
+        // Tự động gán reqId nếu chưa có
+        if (!payload.reqId) payload.reqId = generateReqId();
+        
+        let response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8' // Đảm bảo là Simple Request
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        let text = await response.text();
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            console.error("Lỗi Parse JSON từ Google Server. Phản hồi thô:", text);
+            throw new Error("Lỗi định dạng dữ liệu từ máy chủ.");
+        }
+    }
+
+    function updateSyncBadge() {
+        let badge = document.getElementById('manual-sync-badge');
+        let icon = document.getElementById('manual-sync-icon');
+        if(badge && icon) {
+            if(apiQueue.length > 0) {
+                badge.style.display = 'inline-block';
+                badge.innerText = apiQueue.length;
+                icon.classList.add('fa-spin');
+            } else {
+                badge.style.display = 'none';
+                icon.classList.remove('fa-spin');
+            }
+        }
+    }
+
+    function enqueueTask(payload, msg, onSuccess, onFail) { 
+        apiQueue.push({ payload, msg, onSuccess, onFail }); 
+        updateSyncBadge();
+        processApiQueue(); 
+    }
+    
     function updateProgressUI(isStart, msg) {
         let toast = document.getElementById('sync-toast'), bar = document.getElementById('sync-toast-bar'), pct = document.getElementById('sync-toast-pct'), msgTxt = document.getElementById('sync-toast-msg');
         if(isStart) { 
@@ -998,16 +1170,44 @@
         while (apiQueue.length > 0) { 
             let currentTask = apiQueue[0];
             try { 
-                let res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(currentTask.payload) }); 
-                let data = await res.json(); 
-                apiQueue.shift(); if (currentTask.onSuccess) currentTask.onSuccess(data); 
+                // Sử dụng hàm trung tâm mới
+                let data = await fetchAPI(currentTask.payload); 
+                apiQueue.shift(); 
+                updateSyncBadge();
+                if (currentTask.onSuccess) currentTask.onSuccess(data); 
             } catch (e) { 
-                apiQueue.shift(); if (currentTask.onFail) currentTask.onFail(e); 
+                apiQueue.shift(); 
+                updateSyncBadge();
+                if (currentTask.onFail) currentTask.onFail(e); 
             } 
             if (apiQueue.length > 0) updateProgressUI(true, apiQueue[0].msg);
         }
         updateProgressUI(false); isSyncing = false;
     }
+
+    function manualSyncNow() {
+        let icon = document.getElementById('manual-sync-icon');
+        icon.classList.add('fa-spin');
+        
+        enqueueTask({ action: 'get_dashboard', user: currentUser }, "Đang tải dữ liệu mới...", (json) => {
+            if(json.success) { 
+                dashboardData = json.data; 
+                if(json.hcData) hcData = json.hcData;
+                checkNotifications();
+                showToast("Đã đồng bộ dữ liệu mới nhất!", "success");
+                
+                if(!document.getElementById('view-dashboard').classList.contains('d-none')) renderDashboard();
+                if(!document.getElementById('view-reports').classList.contains('d-none')) renderReports();
+                if(!document.getElementById('view-adjust').classList.contains('d-none') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') { renderAdjustGrid(); }
+                if(!document.getElementById('view-register').classList.contains('d-none') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                    if(document.getElementById('reg-personal').classList.contains('active')) { if(document.getElementById('mode-cycle').classList.contains('active')) renderRegGrid(); if(document.getElementById('mode-vcal').classList.contains('active')) renderVcal(); } 
+                    else if(document.getElementById('reg-others').classList.contains('active')) { renderRegOthersGrid(); } else if(document.getElementById('reg-unregistered').classList.contains('active')) { renderUnregistered(); }
+                }
+            }
+            setTimeout(() => { if(apiQueue.length === 0) icon.classList.remove('fa-spin'); }, 500);
+        });
+    }
+
     function showToast(msg, type = 'secondary') { let cid = 't_' + Date.now(); document.getElementById('toast-container').insertAdjacentHTML('beforeend', `<div id="${cid}" class="toast align-items-center text-bg-${type} border-0 show mb-2 shadow"><div class="d-flex"><div class="toast-body fw-bold">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`); setTimeout(() => document.getElementById(cid)?.remove(), 3000); }
 
     function attachScrollButtons() {
@@ -1089,13 +1289,23 @@
 
     function initColConfig() {
         let stored = localStorage.getItem('bmms_colconfig_' + currentUser.mnv);
-        if(stored) { 
-            userCols = JSON.parse(stored); 
-            if(!userCols.emp.find(c => c.id === 'password')) { userCols.emp.push({ id: 'password', name: 'Mật khẩu', admin: true, visible: true }); } 
-            if(!userCols.adj) userCols.adj = ALL_COLS.filter(c => DEFAULT_COLS.adj.includes(c.id)).map(c => ({...c, visible: true})).concat(ALL_COLS.filter(c => !DEFAULT_COLS.adj.includes(c.id)).map(c => ({...c, visible: false})));
-            if(!userCols.rep) userCols.rep = ALL_COLS.filter(c => DEFAULT_COLS.rep.includes(c.id)).map(c => ({...c, visible: true})).concat(ALL_COLS.filter(c => !DEFAULT_COLS.rep.includes(c.id)).map(c => ({...c, visible: false})));
+        try {
+            if(stored) { 
+                userCols = JSON.parse(stored);
+                if(!userCols.dash) userCols.dash = ALL_COLS.filter(c => DEFAULT_COLS.dash.includes(c.id)).map(c => ({...c, visible: true})).concat(ALL_COLS.filter(c => !DEFAULT_COLS.dash.includes(c.id)).map(c => ({...c, visible: false})));
+                if(!userCols.emp) userCols.emp = ALL_COLS.filter(c => DEFAULT_COLS.emp.includes(c.id)).map(c => ({...c, visible: true})).concat(ALL_COLS.filter(c => !DEFAULT_COLS.emp.includes(c.id)).map(c => ({...c, visible: false})));
+                if(!userCols.ro) userCols.ro = ALL_COLS.filter(c => DEFAULT_COLS.ro.includes(c.id)).map(c => ({...c, visible: true})).concat(ALL_COLS.filter(c => !DEFAULT_COLS.ro.includes(c.id)).map(c => ({...c, visible: false})));
+                if(!userCols.adj) userCols.adj = ALL_COLS.filter(c => DEFAULT_COLS.adj.includes(c.id)).map(c => ({...c, visible: true})).concat(ALL_COLS.filter(c => !DEFAULT_COLS.adj.includes(c.id)).map(c => ({...c, visible: false})));
+                if(!userCols.rep) userCols.rep = ALL_COLS.filter(c => DEFAULT_COLS.rep.includes(c.id)).map(c => ({...c, visible: true})).concat(ALL_COLS.filter(c => !DEFAULT_COLS.rep.includes(c.id)).map(c => ({...c, visible: false})));
+                
+                if(userCols.emp && !userCols.emp.find(c => c.id === 'password')) { userCols.emp.push({ id: 'password', name: 'Mật khẩu', admin: true, visible: true }); } 
+            } else { 
+                ['dash','ro','adj','rep','emp'].forEach(t => { userCols[t] = ALL_COLS.filter(c => DEFAULT_COLS[t].includes(c.id)).map(c => ({...c, visible: true})); ALL_COLS.filter(c => !DEFAULT_COLS[t].includes(c.id)).forEach(c => userCols[t].push({...c, visible: false})); }); 
+            }
+        } catch(e) {
+            console.error("Lỗi dữ liệu cấu hình cột cũ, tự động đặt lại mặc định", e);
+            ['dash','ro','adj','rep','emp'].forEach(t => { userCols[t] = ALL_COLS.filter(c => DEFAULT_COLS[t].includes(c.id)).map(c => ({...c, visible: true})); ALL_COLS.filter(c => !DEFAULT_COLS[t].includes(c.id)).forEach(c => userCols[t].push({...c, visible: false})); }); 
         }
-        else { ['dash','ro','adj','rep','emp'].forEach(t => { userCols[t] = ALL_COLS.filter(c => DEFAULT_COLS[t].includes(c.id)).map(c => ({...c, visible: true})); ALL_COLS.filter(c => !DEFAULT_COLS[t].includes(c.id)).forEach(c => userCols[t].push({...c, visible: false})); }); }
     }
     
     function openColSettings(tab) {
@@ -1120,7 +1330,9 @@
         if (tab === 'dash' || tab === 'rep') {
             h += `<th style="width:90px;">Ngày</th>`;
         }
-        userCols[tab].filter(c => c.visible && (!c.admin || currentUser.role === 'Admin_full')).forEach(c => h += `<th>${c.name}</th>`);
+        if(userCols[tab]) {
+            userCols[tab].filter(c => c.visible && (!c.admin || currentUser.role === 'Admin_full')).forEach(c => h += `<th>${c.name}</th>`);
+        }
         if(tab==='emp') {
             if (currentUser.role === 'Admin_full') h += `<th class="req-edit-role edit-col-view">Sửa</th>`;
         } else h += `<th style="min-width: 60px;">Sáng</th><th style="min-width: 60px;">Trưa</th><th style="min-width: 60px;">Chiều</th><th class="ot-col" style="min-width: 70px;">Tăng ca</th><th class="text-start" style="min-width: 150px;">Ghi chú</th>`;
@@ -1130,6 +1342,7 @@
     
     function buildTbodyCols(tab, eObj, isEdit) {
         let h = '';
+        if(!userCols[tab]) return h;
         userCols[tab].filter(c => c.visible && (!c.admin || currentUser.role === 'Admin_full')).forEach(c => {
             let v = eObj[c.id] || '';
             if(isEdit && !['mnv'].includes(c.id)) {
@@ -1224,8 +1437,7 @@
         if(stored) { 
             try {
                 currentUser = JSON.parse(stored); 
-                let res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({action: 'get_initial_data', user: currentUser})});
-                let d = await res.json();
+                let d = await fetchAPI({action: 'get_initial_data', user: currentUser});
                 if(d.success) { dashboardData = d.dashboard; hcData = d.hcData || []; employeeData = d.employees; holidaysData = d.holidays; appSettings = d.appSettings; initColConfig(); buildTreeFilters(); showApp(); }
                 else { showLoginView(); }
             } catch (e) {
@@ -1245,11 +1457,14 @@
         if(!mnv || !pass) return err.innerText = 'Nhập đủ thông tin';
         document.getElementById('btn-login').disabled = true; document.getElementById('login-spinner').classList.remove('d-none');
         try {
-            let res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', mnv: mnv.trim(), pass: pass.trim() }) }).then(r=>r.json());
+            let res = await fetchAPI({ action: 'login', mnv: mnv.trim(), pass: pass.trim() });
+            
             if(res && res.success) { 
                 let remember = document.getElementById('remember-me').checked;
                 if(remember) localStorage.setItem('bmms_user', JSON.stringify(res.user)); else sessionStorage.setItem('bmms_user', JSON.stringify(res.user));
-                let initRes = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'get_initial_data', user: res.user }) }).then(r=>r.json());
+                
+                let initRes = await fetchAPI({ action: 'get_initial_data', user: res.user });
+                
                 document.getElementById('btn-login').disabled = false; document.getElementById('login-spinner').classList.add('d-none');
                 
                 if(initRes.success) {
@@ -1270,13 +1485,30 @@
     async function handleResetPassword() {
         let mnv = document.getElementById('fg-mnv').value, phone = document.getElementById('fg-phone').value, cccd = document.getElementById('fg-cccd').value, newPass = document.getElementById('fg-new').value, confirmPass = document.getElementById('fg-confirm').value;
         if(!mnv || !phone || !cccd || !newPass) return showToast('Vui lòng nhập đủ thông tin (*)', 'danger'); if(newPass !== confirmPass) return showToast('Mật khẩu mới không khớp!', 'danger');
-        document.getElementById('btn-forgot').disabled = true; let res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'reset_password', mnv: mnv.trim(), phone: phone.trim(), cccd: cccd.trim(), newPass: newPass.trim() }) }).then(r=>r.json()); document.getElementById('btn-forgot').disabled = false;
-        if(res.success) { showToast(res.message, 'success'); toggleForgotPass(false); document.getElementById('login-pass').value = newPass; } else showToast(res.message, 'danger');
+        document.getElementById('btn-forgot').disabled = true; 
+        
+        try {
+            let res = await fetchAPI({ action: 'reset_password', mnv: mnv.trim(), phone: phone.trim(), cccd: cccd.trim(), newPass: newPass.trim() });
+            document.getElementById('btn-forgot').disabled = false;
+            if(res.success) { showToast(res.message, 'success'); toggleForgotPass(false); document.getElementById('login-pass').value = newPass; } else showToast(res.message, 'danger');
+        } catch (e) {
+            document.getElementById('btn-forgot').disabled = false;
+            showToast("Lỗi kết nối máy chủ", "danger");
+        }
     }
 
     let cpModalObj;
     function openChangePassModal() { if(!cpModalObj) cpModalObj = new bootstrap.Modal(document.getElementById('changePassModal')); document.getElementById('cp-old').value = ''; document.getElementById('cp-new').value = ''; document.getElementById('cp-confirm').value = ''; cpModalObj.show(); }
-    async function submitChangePassword() { let oldPass = document.getElementById('cp-old').value, newPass = document.getElementById('cp-new').value, confirm = document.getElementById('cp-confirm').value; if(!oldPass || !newPass) return showToast("Nhập đủ thông tin!", 'danger'); if(newPass !== confirm) return showToast("Mật khẩu mới không khớp!", 'danger'); let res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'change_password', mnv: currentUser.mnv, oldPass: oldPass.trim(), newPass: newPass.trim() }) }).then(r=>r.json()); if(res.success) { showToast(res.message, 'success'); cpModalObj.hide(); } else showToast(res.message, 'danger'); }
+    
+    async function submitChangePassword() { 
+        let oldPass = document.getElementById('cp-old').value, newPass = document.getElementById('cp-new').value, confirm = document.getElementById('cp-confirm').value; 
+        if(!oldPass || !newPass) return showToast("Nhập đủ thông tin!", 'danger'); 
+        if(newPass !== confirm) return showToast("Mật khẩu mới không khớp!", 'danger'); 
+        try {
+            let res = await fetchAPI({ action: 'change_password', mnv: currentUser.mnv, oldPass: oldPass.trim(), newPass: newPass.trim() });
+            if(res.success) { showToast(res.message, 'success'); cpModalObj.hide(); } else showToast(res.message, 'danger'); 
+        } catch (e) { showToast("Lỗi kết nối", "danger"); }
+    }
 
     function logout() { localStorage.removeItem('bmms_user'); sessionStorage.removeItem('bmms_user'); location.reload(); }
 
@@ -1291,7 +1523,7 @@
         canEditEmp = (currentUser.role === 'Admin_full');
         
         let perms = appSettings.userPerms ? appSettings.userPerms[currentUser.mnv] : null;
-        let f_ro = false, f_un = false, f_da = false, f_em = false, f_se = false;
+        let f_ro = false, f_un = false, f_da = false, f_em = false, f_se = false, f_rep = false, f_adj = false;
 
         if (perms && perms.features) {
             f_ro = perms.features.includes('reg_others');
@@ -1299,15 +1531,17 @@
             f_da = perms.features.includes('dash');
             f_em = perms.features.includes('emp');
             f_se = perms.features.includes('settings');
+            f_rep = perms.features.includes('rep');
+            f_adj = perms.features.includes('adj');
         }
         
         if (currentUser.role === 'Admin_full') {
-            f_ro = f_un = f_da = f_em = f_se = true;
+            f_ro = f_un = f_da = f_em = f_se = f_rep = f_adj = true;
         } else if (currentUser.role === 'Bep_An') {
             f_da = true;
         }
         
-        let canManage = f_ro || f_un || f_da || f_em || f_se;
+        let canManage = f_ro || f_un || f_da || f_em || f_se || f_rep || f_adj;
         
         let menuHTML = '';
         if(canManage) {
@@ -1319,11 +1553,11 @@
             if(f_un) menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="#" onclick="switchRegTab('reg-unregistered', this); return false;"><i class="fa-solid fa-user-xmark"></i> Chưa đăng ký</a></li>`;
             menuHTML += `</ul></li>`;
             
-            if (f_da || f_em || f_se || currentUser.role === 'Admin_full') {
+            if (f_da || f_em || f_se || f_rep || f_adj || currentUser.role === 'Admin_full') {
                 menuHTML += `<li class="nav-item dropdown"><a class="nav-link dropdown-toggle menu-link" href="#" data-bs-toggle="dropdown" onclick="return false;"><i class="fa-solid fa-briefcase"></i> Quản lý</a><ul class="dropdown-menu shadow-sm">`;
-                if(f_da) menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="#" onclick="switchView('reports', this); return false;"><i class="fa-solid fa-file-excel"></i> Báo cáo</a></li>`;
+                if(f_rep) menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="#" onclick="switchView('reports', this); return false;"><i class="fa-solid fa-file-excel"></i> Báo cáo</a></li>`;
                 if(f_da) menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="#" onclick="switchView('dashboard', this); return false;"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>`;
-                if(f_ro) menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="#" onclick="switchView('adjust', this); return false;"><i class="fa-solid fa-pen-ruler"></i> Hiệu chỉnh</a></li>`;
+                if(f_adj) menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="#" onclick="switchView('adjust', this); return false;"><i class="fa-solid fa-pen-ruler"></i> Hiệu chỉnh</a></li>`;
                 if(f_em) menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="#" onclick="switchView('employees', this); return false;"><i class="fa-solid fa-users-gear"></i> Nhân sự</a></li>`;
                 if(f_se || currentUser.role === 'Admin_full') {
                     menuHTML += `<li><a class="dropdown-item fw-bold text-secondary admin-full-only" href="#" onclick="switchView('settings', this); return false;"><i class="fa-solid fa-cogs"></i> Thiết lập</a></li>`;
@@ -1376,23 +1610,16 @@
         changeFilterType('mc');
     }
 
-    function showPermUserTable() {
-        document.getElementById('perm-user-dropdown').style.display = 'block';
-    }
-    
-    function hidePermUserTable() {
-        setTimeout(() => {
-            let el = document.getElementById('perm-user-dropdown');
-            if(el) el.style.display = 'none';
-        }, 200);
-    }
+    function showPermUserTable() { document.getElementById('perm-user-dropdown').style.display = 'block'; }
+    function hidePermUserTable() { setTimeout(() => { let el = document.getElementById('perm-user-dropdown'); if(el) el.style.display = 'none'; }, 200); }
     
     function filterPermUserTable() {
-        let val = removeAccents(document.getElementById('perm-user-search').value);
+        let val = removeAccents(document.getElementById('perm-user-search').value).toLowerCase();
         let trs = document.getElementById('perm-user-tbody').getElementsByTagName('tr');
-        for(let tr of trs) {
-            let text = removeAccents(tr.innerText);
-            tr.style.display = text.includes(val) ? '' : 'none';
+        for(let i = 0; i < trs.length; i++) {
+            let tr = trs[i];
+            let searchData = tr.getAttribute('data-search') || '';
+            if(searchData.includes(val)) tr.style.display = ''; else tr.style.display = 'none';
         }
     }
     
@@ -1417,15 +1644,49 @@
             document.getElementById('price-ot').value = prices.ot.toLocaleString('en-US');
         }
         
+        let s = appSettings.syncSettings || { 'Admin_full': 30, 'Admin_BP': 30, 'Hành chính bộ phận': 30, 'Bep_An': 30, 'Nhan_Vien': 0 };
+        if(document.getElementById('sync-admin-full')) {
+            document.getElementById('sync-admin-full').value = s['Admin_full'] !== undefined ? s['Admin_full'] : 30;
+            document.getElementById('sync-admin-bp').value = s['Admin_BP'] !== undefined ? s['Admin_BP'] : 30;
+            document.getElementById('sync-hcbp').value = s['Hành chính bộ phận'] !== undefined ? s['Hành chính bộ phận'] : 30;
+            document.getElementById('sync-bep').value = s['Bep_An'] !== undefined ? s['Bep_An'] : 30;
+            document.getElementById('sync-nhanvien').value = s['Nhan_Vien'] !== undefined ? s['Nhan_Vien'] : 0;
+        }
+        
         if(document.getElementById('perm-user-tbody')) {
             let permUserTbody = document.getElementById('perm-user-tbody');
             let html = '';
-            employeeData.forEach(e => {
+            
+            let sortedEmps = [...employeeData].sort((a, b) => {
+                const roleOrder = { 'Admin_full': 1, 'Admin_BP': 2, 'Bep_An': 3, 'Nhan_Vien': 4 };
+                let orderA = roleOrder[a.role] || 99;
+                let orderB = roleOrder[b.role] || 99;
+                
+                if (orderA !== orderB) return orderA - orderB;
+                return (a.name || '').localeCompare(b.name || '');
+            });
+
+            sortedEmps.forEach(e => {
                 let escapedName = e.name ? e.name.replace(/'/g, "\\'") : '';
-                html += `<tr onclick="selectPermUserFromTable('${e.mnv}', '${escapedName}')">
-                            <td><b>${e.mnv}</b> - ${e.name}</td>
-                            <td>${e.title || ''}</td>
-                            <td><span class="badge bg-info text-dark">${e.role || 'Trống'}</span></td>
+                let searchString = removeAccents((e.mnv || '') + ' ' + (e.name || '')).toLowerCase();
+                
+                let badgeClass = 'bg-light text-secondary border';
+                if(e.role === 'Admin_full') badgeClass = 'bg-danger text-white';
+                else if(e.role === 'Admin_BP') badgeClass = 'bg-warning text-dark';
+                else if(e.role === 'Hành chính bộ phận') badgeClass = 'bg-primary text-white';
+                else if(e.role === 'Bep_An') badgeClass = 'bg-success text-white';
+                else if(e.role === 'Nhan_Vien') badgeClass = 'bg-info text-dark';
+
+                html += `<tr onclick="selectPermUserFromTable('${e.mnv}', '${escapedName}')" data-search="${searchString}">
+                            <td class="align-middle text-nowrap">
+                                <span class="fw-bold text-success">${e.mnv}</span>
+                                <span class="text-muted mx-1">-</span>
+                                <span class="fw-bold text-dark">${e.name}</span>
+                            </td>
+                            <td class="text-muted small align-middle text-truncate" style="max-width: 150px;">${e.title || '-'}</td>
+                            <td class="text-center align-middle">
+                                <span class="badge ${badgeClass} shadow-sm px-2 py-1">${e.role || 'Chưa cấp'}</span>
+                            </td>
                          </tr>`;
             });
             permUserTbody.innerHTML = html;
@@ -1564,9 +1825,31 @@
         };
         appSettings.mealLocks = { main: { d: parseInt(document.getElementById(`set-main-d`).value)||0, h: parseInt(document.getElementById(`set-main-h`).value)||0 }, ot: { d: parseInt(document.getElementById(`set-ot-d`).value)||0, h: parseInt(document.getElementById(`set-ot-h`).value)||0 }, sunMain: { d: parseInt(document.getElementById(`set-sun-main-d`).value)||0, h: parseInt(document.getElementById(`set-sun-main-h`).value)||0 }, sunOt: { d: parseInt(document.getElementById(`set-sun-ot-d`).value)||0, h: parseInt(document.getElementById(`set-sun-ot-h`).value)||0 } };
         appSettings.leaveOffset = parseInt(document.getElementById('set-leave-offset').value) || 0; appSettings.notify = { d: parseInt(document.getElementById('set-noti-d').value)||0, h: parseInt(document.getElementById('set-noti-h').value)||0 };
-        enqueueTask({ action: 'save_settings', user: currentUser, settings: appSettings }, "Đang lưu cấu hình...", (d) => { if(d.success) { showToast(d.message, 'success'); renderVcal(); } else showToast('Lỗi', 'danger'); });
+        
+        appSettings.syncSettings = {
+            'Admin_full': parseInt(document.getElementById('sync-admin-full').value) || 0,
+            'Admin_BP': parseInt(document.getElementById('sync-admin-bp').value) || 0,
+            'Hành chính bộ phận': parseInt(document.getElementById('sync-hcbp').value) || 0,
+            'Bep_An': parseInt(document.getElementById('sync-bep').value) || 0,
+            'Nhan_Vien': parseInt(document.getElementById('sync-nhanvien').value) || 0
+        };
+
+        enqueueTask({ action: 'save_settings', user: currentUser, settings: appSettings }, "Đang lưu cấu hình...", (d) => { 
+            if(d.success) { 
+                showToast(d.message, 'success'); 
+                renderVcal(); 
+                startRealtimeSync();
+            } else {
+                showToast('Lỗi', 'danger'); 
+            }
+        });
     }
 
+    function changeRegCycle(dir) {
+        currentCycleOffset += dir;
+        renderVcal();
+    }
+    
     function openMealCostModal() {
         let prices = appSettings.mealPrices || {bf: 0, lu: 0, di: 0, ot: 0};
         
@@ -1682,9 +1965,19 @@
 
     function startRealtimeSync() {
         if(realtimeTimer) clearInterval(realtimeTimer);
+        let s = appSettings.syncSettings || { 'Admin_full': 30, 'Admin_BP': 30, 'Hành chính bộ phận': 30, 'Bep_An': 30, 'Nhan_Vien': 0 };
+        let intervalSec = s[currentUser.role];
+        if (intervalSec === undefined) intervalSec = 30; 
+        
+        if (intervalSec <= 0) return; 
+        
         realtimeTimer = setInterval(async () => {
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'get_dashboard', user: currentUser }) }).then(res => res.json()).then(json => {
-                if(json.success) { dashboardData = json.data; checkNotifications();
+            try {
+                let json = await fetchAPI({ action: 'get_dashboard', user: currentUser });
+                if(json.success) { 
+                    dashboardData = json.data; 
+                    if(json.hcData) hcData = json.hcData;
+                    checkNotifications();
                     if(!document.getElementById('view-dashboard').classList.contains('d-none')) renderDashboard();
                     if(!document.getElementById('view-reports').classList.contains('d-none')) renderReports();
                     if(!document.getElementById('view-adjust').classList.contains('d-none') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') { renderAdjustGrid(); }
@@ -1693,8 +1986,10 @@
                         else if(document.getElementById('reg-others').classList.contains('active')) { renderRegOthersGrid(); } else if(document.getElementById('reg-unregistered').classList.contains('active')) { renderUnregistered(); }
                     }
                 }
-            }).catch(e => console.log("Realtime Sync Fail"));
-        }, 30000); 
+            } catch (e) {
+                console.log("Realtime Sync Fail");
+            }
+        }, intervalSec * 1000); 
     }
 
     function startCountdown() { 
@@ -1725,10 +2020,14 @@
     }
 
     async function reloadDashboardData() { 
-        let d = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'get_dashboard', user: currentUser }) }).then(r=>r.json()); 
+        let d = await fetchAPI({ action: 'get_dashboard', user: currentUser });
         if(d.success) { dashboardData = d.data; if(d.hcData) hcData = d.hcData; } 
     }
-    async function reloadEmployeeData() { let d = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'get_employees', user: currentUser }) }).then(r=>r.json()); if(d.success) employeeData = d.data; buildTreeFilters(); }
+    
+    async function reloadEmployeeData() { 
+        let d = await fetchAPI({ action: 'get_employees', user: currentUser });
+        if(d.success) employeeData = d.data; buildTreeFilters(); 
+    }
 
     function buildTreeFilters() {
         let tree = {}; employeeData.forEach(e => { let path = [e.dv, e.bp1, e.dept_cap2, e.bp3, e.bp4, e.bp5].filter(Boolean); if(path.length === 0) path = ['Chưa phân bổ']; let current = tree; path.forEach(node => { if(!current[node]) current[node] = {}; current = current[node]; }); }); let html = buildTreeHTML(tree, 0, 'all');
@@ -1843,7 +2142,7 @@
                 let empObj = employeeData.find(e => String(e.mnv) === String(row.mnv)) || {}; let status = empObj.leaveStatus || 'Đang làm việc';
                 if (!sStatuses.includes(status)) return;
 
-                let deptMatch = (sDepts.length === 0) || sDepts.includes(row.bp1) || sDepts.includes(row.dept);
+                let deptMatch = (sDepts.length === 0) || sDepts.includes(empObj.dv) || sDepts.includes(empObj.bp1) || sDepts.includes(empObj.dept_cap2) || sDepts.includes(empObj.bp3) || sDepts.includes(empObj.bp4) || sDepts.includes(empObj.bp5);
                 let textMatch = (!sText) || removeAccents(row.mnv).includes(sText) || removeAccents(row.name).includes(sText);
                 let bpGocMatch = (sBpGoc.length === 0) || sBpGoc.includes(row.bp_goc);
                 
@@ -1857,11 +2156,376 @@
                 }
             }
         });
-        tbody.innerHTML = html.length > 0 ? html.join('') : `<tr><td colspan="${userCols['dash'].length + 7}" class="text-center text-muted">Không có dữ liệu phù hợp</td></tr>`;
+        tbody.innerHTML = html.length > 0 ? html.join('') : `<tr><td colspan="${(userCols['dash']||[]).length + 7}" class="text-center text-muted">Không có dữ liệu phù hợp</td></tr>`;
         document.getElementById('dash-sang').innerText = sumSangBt + sumSangHy; document.getElementById('dash-sang-bt').innerText = sumSangBt; document.getElementById('dash-sang-hy').innerText = sumSangHy; document.getElementById('dash-trua').innerText = sumTruaBt + sumTruaHy; document.getElementById('dash-trua-bt').innerText = sumTruaBt; document.getElementById('dash-trua-hy').innerText = sumTruaHy; document.getElementById('dash-toi').innerText = sumToiBt + sumToiHy; document.getElementById('dash-toi-bt').innerText = sumToiBt; document.getElementById('dash-toi-hy').innerText = sumToiHy; document.getElementById('dash-ot').innerText = sumOtBt + sumOtHy; document.getElementById('dash-ot-bt').innerText = sumOtBt; document.getElementById('dash-ot-hy').innerText = sumOtHy;
     }
 
-    // REPORTS (Tab)
+    function saveExportConfig() {
+        try {
+            let config = {
+                kitBt: document.getElementById('dep-kit-bt') ? document.getElementById('dep-kit-bt').checked : true,
+                kitHy: document.getElementById('dep-kit-hy') ? document.getElementById('dep-kit-hy').checked : true,
+                bf: document.getElementById('dep-bf') ? document.getElementById('dep-bf').checked : true,
+                lu: document.getElementById('dep-lu') ? document.getElementById('dep-lu').checked : true,
+                di: document.getElementById('dep-di') ? document.getElementById('dep-di').checked : true,
+                ot: document.getElementById('dep-ot') ? document.getElementById('dep-ot').checked : true,
+                cols: Array.from(document.querySelectorAll('.dep-col-cb:checked')).map(cb => cb.value),
+                printOri: document.getElementById('print-landscape').checked ? 'landscape' : 'portrait'
+            };
+            localStorage.setItem('bmms_export_config_' + currentUser.mnv, JSON.stringify(config));
+        } catch (e) { console.error("Lỗi khi lưu thiết lập xuất in:", e); }
+    }
+
+    let dpModal = null;
+    function openPrintExportModal() {
+        let modalEl = document.getElementById('dashExportPrintModal');
+        if(!modalEl) return showToast("Không tìm thấy giao diện In/Xuất. Vui lòng tải lại trang!", "danger");
+        
+        if(!dpModal) dpModal = new bootstrap.Modal(modalEl);
+        
+        let savedConfig = localStorage.getItem('bmms_export_config_' + currentUser.mnv);
+        let config = null;
+        try { config = savedConfig ? JSON.parse(savedConfig) : null; } catch(e) {}
+
+        if (config) {
+            if(document.getElementById('dep-kit-bt')) document.getElementById('dep-kit-bt').checked = config.kitBt !== false;
+            if(document.getElementById('dep-kit-hy')) document.getElementById('dep-kit-hy').checked = config.kitHy !== false;
+            if(document.getElementById('dep-bf')) document.getElementById('dep-bf').checked = config.bf !== false;
+            if(document.getElementById('dep-lu')) document.getElementById('dep-lu').checked = config.lu !== false;
+            if(document.getElementById('dep-di')) document.getElementById('dep-di').checked = config.di !== false;
+            if(document.getElementById('dep-ot')) document.getElementById('dep-ot').checked = config.ot !== false;
+            if(config.printOri === 'portrait' && document.getElementById('print-portrait')) {
+                document.getElementById('print-portrait').checked = true;
+            } else if (document.getElementById('print-landscape')) {
+                document.getElementById('print-landscape').checked = true;
+            }
+        }
+
+        let colContainer = document.getElementById('dep-col-container');
+        if(colContainer) {
+            let visibleCols = (userCols && userCols['dash']) ? userCols['dash'].filter(c => c.visible && (!c.admin || currentUser.role === 'Admin_full')) : [];
+            let html = '';
+            visibleCols.forEach(c => {
+                let isChecked = (config && Array.isArray(config.cols)) ? config.cols.includes(c.id) : true;
+                html += `<label class="form-check-label bg-white border px-2 py-1 rounded small" style="cursor:pointer;"><input type="checkbox" class="form-check-input dep-col-cb me-1" value="${c.id}" ${isChecked ? 'checked' : ''}> ${c.name}</label>`;
+            });
+            colContainer.innerHTML = html || '<span class="text-muted small">Không có dữ liệu cột.</span>';
+        }
+
+        dpModal.show();
+    }
+
+    async function exportDashboardExcel() {
+        let dStrInput = document.getElementById('dash-date').value;
+        if(!dStrInput) return showToast("Vui lòng chọn khoảng thời gian!", "danger");
+        
+        let kitBt = document.getElementById('dep-kit-bt') ? document.getElementById('dep-kit-bt').checked : true;
+        let kitHy = document.getElementById('dep-kit-hy') ? document.getElementById('dep-kit-hy').checked : true;
+        let showBf = document.getElementById('dep-bf') ? document.getElementById('dep-bf').checked : true;
+        let showLu = document.getElementById('dep-lu') ? document.getElementById('dep-lu').checked : true;
+        let showDi = document.getElementById('dep-di') ? document.getElementById('dep-di').checked : true;
+        let showOt = document.getElementById('dep-ot') ? document.getElementById('dep-ot').checked : true;
+
+        if(!kitBt && !kitHy) return showToast("Phải chọn ít nhất 1 Bếp!", "danger");
+        if(!showBf && !showLu && !showDi && !showOt) return showToast("Phải chọn ít nhất 1 buổi ăn!", "danger");
+
+        saveExportConfig();
+
+        let selectedColIds = Array.from(document.querySelectorAll('.dep-col-cb:checked')).map(cb => cb.value);
+        let selectedColsToExport = (userCols && userCols['dash']) ? userCols['dash'].filter(c => selectedColIds.includes(c.id)) : [];
+        
+        showToast("Đang tạo file Excel...", "info");
+
+        let wb = new ExcelJS.Workbook();
+        let ws = wb.addWorksheet('Dashboard', { views: [{ state: 'frozen', ySplit: 6 }]});
+
+        ws.getCell('A1').value = 'BÁO CÁO DANH SÁCH SUẤT ĂN TỔNG HỢP';
+        ws.getCell('A1').font = { size: 16, bold: true, color: { argb: 'FF00693C' } };
+        ws.mergeCells('A1:E1');
+        
+        ws.getCell('A2').value = `Thời gian xuất: ${new Date().toLocaleString('vi-VN')}`;
+        ws.getCell('A3').value = `Kỳ dữ liệu: ${dStrInput}`;
+        let kitchenNameArr = [];
+        if(kitBt) kitchenNameArr.push('Bãi Trường');
+        if(kitHy) kitchenNameArr.push('Hyatt');
+        ws.getCell('A4').value = `Bếp: ${kitchenNameArr.join(' & ')} | Người xuất: ${currentUser.name} (${currentUser.mnv})`;
+
+        let headers = ['STT'];
+        selectedColsToExport.forEach(c => headers.push(c.name));
+        let mealStartColIndex = headers.length + 1; 
+
+        if(showBf) headers.push('Sáng');
+        if(showLu) headers.push('Trưa');
+        if(showDi) headers.push('Chiều');
+        if(showOt) headers.push('Tăng ca');
+        headers.push('Ghi chú');
+
+        let dStart, dEnd; 
+        if(dStrInput.includes(' to ')) { let p = dStrInput.split(' to '); let p1 = p[0].split('/'); dStart = new Date(p1[2], p1[1]-1, p1[0]); dStart.setHours(0,0,0); let p2 = p[1].split('/'); dEnd = new Date(p2[2], p2[1]-1, p2[0]); dEnd.setHours(23,59,59); } else { let p1 = dStrInput.split('/'); dStart = new Date(p1[2], p1[1]-1, p1[0]); dStart.setHours(0,0,0); dEnd = new Date(dStart); dEnd.setHours(23,59,59); }
+        let sText = removeAccents(document.getElementById('dash-search').value);
+        let sDepts = getCheckedTreeVals('dash-dept-tree');
+        let sStatuses = getCheckedStatuses('dash');
+        let sBpGoc = getCheckedBpGoc('dash');
+
+        let exportDataRows = [];
+        let rIdx = 7;
+        let cIdx = 1;
+        let sumBf = 0, sumLu = 0, sumDi = 0, sumOt = 0;
+
+        dashboardData.forEach(row => {
+            let cleanDate = String(row.date).trim(); let rDateObj; 
+            if(cleanDate.includes('/')) { let p = cleanDate.split('/'); rDateObj = new Date(p[2], parseInt(p[1])-1, p[0], 12, 0, 0); } else rDateObj = new Date(cleanDate);
+            
+            if (rDateObj >= dStart && rDateObj <= dEnd) {
+                let empObj = employeeData.find(e => String(e.mnv) === String(row.mnv)) || {}; 
+                let status = empObj.leaveStatus || 'Đang làm việc';
+                if (!sStatuses.includes(status)) return;
+                
+                let deptMatch = (sDepts.length === 0) || sDepts.includes(empObj.dv) || sDepts.includes(empObj.bp1) || sDepts.includes(empObj.dept_cap2) || sDepts.includes(empObj.bp3) || sDepts.includes(empObj.bp4) || sDepts.includes(empObj.bp5);
+                let textMatch = (!sText) || removeAccents(row.mnv).includes(sText) || removeAccents(row.name).includes(sText);
+                let bpGocMatch = (sBpGoc.length === 0) || sBpGoc.includes(row.bp_goc);
+
+                if (deptMatch && textMatch && bpGocMatch) {
+                    let vBf = row.breakfast === '0' || !row.breakfast ? '' : row.breakfast;
+                    let vLu = row.lunch === '0' || !row.lunch ? '' : row.lunch;
+                    let vDi = row.dinner === '0' || !row.dinner ? '' : row.dinner;
+                    let vOt = row.ot === '0' || !row.ot ? '' : row.ot;
+                    
+                    if (!kitBt && vBf === 'X') vBf = '';
+                    if (!kitHy && vBf === 'Y') vBf = '';
+                    if (!kitBt && vLu === 'X') vLu = '';
+                    if (!kitHy && vLu === 'Y') vLu = '';
+                    if (!kitBt && vDi === 'X') vDi = '';
+                    if (!kitHy && vDi === 'Y') vDi = '';
+                    if (!kitBt && vOt === 'X') vOt = '';
+                    if (!kitHy && vOt === 'Y') vOt = '';
+
+                    let hasTargetMeal = (showBf && vBf) || (showLu && vLu) || (showDi && vDi) || (showOt && vOt);
+                    
+                    if(hasTargetMeal) {
+                        if(showBf && vBf) sumBf++;
+                        if(showLu && vLu) sumLu++;
+                        if(showDi && vDi) sumDi++;
+                        if(showOt && vOt) sumOt++;
+
+                        let rData = [cIdx++];
+                        selectedColsToExport.forEach(c => rData.push(empObj[c.id] || row[c.id] || ''));
+                        if(showBf) rData.push(vBf);
+                        if(showLu) rData.push(vLu);
+                        if(showDi) rData.push(vDi);
+                        if(showOt) rData.push(vOt);
+                        rData.push(row.note || '');
+                        exportDataRows.push(rData);
+                    }
+                }
+            }
+        });
+
+        let row5 = ws.getRow(5);
+        row5.getCell(mealStartColIndex - 1).value = 'TỔNG CỘNG:';
+        row5.getCell(mealStartColIndex - 1).font = { bold: true, color: { argb: 'FFFF0000' } };
+        row5.getCell(mealStartColIndex - 1).alignment = { horizontal: 'right' };
+        
+        let currentCol = mealStartColIndex;
+        if(showBf) { row5.getCell(currentCol).value = sumBf; row5.getCell(currentCol).font = { bold: true, size: 13, color: { argb: 'FF0000FF' } }; currentCol++; }
+        if(showLu) { row5.getCell(currentCol).value = sumLu; row5.getCell(currentCol).font = { bold: true, size: 13, color: { argb: 'FF00B050' } }; currentCol++; }
+        if(showDi) { row5.getCell(currentCol).value = sumDi; row5.getCell(currentCol).font = { bold: true, size: 13, color: { argb: 'FF7030A0' } }; currentCol++; }
+        if(showOt) { row5.getCell(currentCol).value = sumOt; row5.getCell(currentCol).font = { bold: true, size: 13, color: { argb: 'FFFF0000' } }; currentCol++; }
+        
+        let row6 = ws.getRow(6);
+        row6.values = headers;
+        row6.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        row6.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+        for (let i = 1; i <= headers.length; i++) {
+            row6.getCell(i).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00693C' } };
+            row6.getCell(i).border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+        }
+        
+        exportDataRows.forEach(rowData => {
+            let tr = ws.addRow(rowData);
+            tr.eachCell(cell => {
+                cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+                cell.alignment = { vertical: 'middle' };
+            });
+            tr.getCell(1).alignment = { horizontal: 'center' };
+            for(let i = mealStartColIndex; i < mealStartColIndex + (showBf?1:0) + (showLu?1:0) + (showDi?1:0) + (showOt?1:0); i++) {
+                tr.getCell(i).alignment = { horizontal: 'center' };
+                tr.getCell(i).font = { bold: true };
+            }
+        });
+
+        ws.columns.forEach((c, idx) => {
+            if(idx === 0) c.width = 6;
+            else if(idx >= mealStartColIndex - 1 && idx < headers.length - 1) c.width = 10;
+            else c.width = 18;
+        });
+
+        try {
+            const outBuffer = await wb.xlsx.writeBuffer();
+            saveAs(new Blob([outBuffer]), `Dashboard_${dStrInput.replace(/\//g, '.')}.xlsx`);
+            if(dpModal) dpModal.hide();
+            showToast("Xuất Dashboard thành công!", "success");
+        } catch(e) {
+            showToast("Đã có lỗi khi tạo file Excel!", "danger");
+        }
+    }
+
+    function printDashboard() {
+        let dStrInput = document.getElementById('dash-date').value;
+        if(!dStrInput) return showToast("Vui lòng chọn khoảng thời gian!", "danger");
+        
+        let kitBt = document.getElementById('dep-kit-bt') ? document.getElementById('dep-kit-bt').checked : true;
+        let kitHy = document.getElementById('dep-kit-hy') ? document.getElementById('dep-kit-hy').checked : true;
+        let showBf = document.getElementById('dep-bf') ? document.getElementById('dep-bf').checked : true;
+        let showLu = document.getElementById('dep-lu') ? document.getElementById('dep-lu').checked : true;
+        let showDi = document.getElementById('dep-di') ? document.getElementById('dep-di').checked : true;
+        let showOt = document.getElementById('dep-ot') ? document.getElementById('dep-ot').checked : true;
+        
+        let printOri = document.getElementById('print-landscape').checked ? 'landscape' : 'portrait';
+
+        if(!kitBt && !kitHy) return showToast("Phải chọn ít nhất 1 Bếp!", "danger");
+        if(!showBf && !showLu && !showDi && !showOt) return showToast("Phải chọn ít nhất 1 buổi ăn!", "danger");
+
+        saveExportConfig();
+
+        let selectedColIds = Array.from(document.querySelectorAll('.dep-col-cb:checked')).map(cb => cb.value);
+        let selectedColsToExport = (userCols && userCols['dash']) ? userCols['dash'].filter(c => selectedColIds.includes(c.id)) : [];
+        
+        let dStart, dEnd; 
+        if(dStrInput.includes(' to ')) { let p = dStrInput.split(' to '); let p1 = p[0].split('/'); dStart = new Date(p1[2], p1[1]-1, p1[0]); dStart.setHours(0,0,0); let p2 = p[1].split('/'); dEnd = new Date(p2[2], p2[1]-1, p2[0]); dEnd.setHours(23,59,59); } else { let p1 = dStrInput.split('/'); dStart = new Date(p1[2], p1[1]-1, p1[0]); dStart.setHours(0,0,0); dEnd = new Date(dStart); dEnd.setHours(23,59,59); }
+        let sText = removeAccents(document.getElementById('dash-search').value);
+        let sDepts = getCheckedTreeVals('dash-dept-tree');
+        let sStatuses = getCheckedStatuses('dash');
+        let sBpGoc = getCheckedBpGoc('dash');
+
+        let cIdx = 1, sumBf = 0, sumLu = 0, sumDi = 0, sumOt = 0;
+        let tbodyHtml = '';
+
+        dashboardData.forEach(row => {
+            let cleanDate = String(row.date).trim(); let rDateObj; 
+            if(cleanDate.includes('/')) { let p = cleanDate.split('/'); rDateObj = new Date(p[2], parseInt(p[1])-1, p[0], 12, 0, 0); } else rDateObj = new Date(cleanDate);
+            
+            if (rDateObj >= dStart && rDateObj <= dEnd) {
+                let empObj = employeeData.find(e => String(e.mnv) === String(row.mnv)) || {}; 
+                let status = empObj.leaveStatus || 'Đang làm việc';
+                if (!sStatuses.includes(status)) return;
+                
+                let deptMatch = (sDepts.length === 0) || sDepts.includes(empObj.dv) || sDepts.includes(empObj.bp1) || sDepts.includes(empObj.dept_cap2) || sDepts.includes(empObj.bp3) || sDepts.includes(empObj.bp4) || sDepts.includes(empObj.bp5);
+                let textMatch = (!sText) || removeAccents(row.mnv).includes(sText) || removeAccents(row.name).includes(sText);
+                let bpGocMatch = (sBpGoc.length === 0) || sBpGoc.includes(row.bp_goc);
+
+                if (deptMatch && textMatch && bpGocMatch) {
+                    let vBf = row.breakfast === '0' || !row.breakfast ? '' : row.breakfast;
+                    let vLu = row.lunch === '0' || !row.lunch ? '' : row.lunch;
+                    let vDi = row.dinner === '0' || !row.dinner ? '' : row.dinner;
+                    let vOt = row.ot === '0' || !row.ot ? '' : row.ot;
+                    
+                    if (!kitBt && vBf === 'X') vBf = '';
+                    if (!kitHy && vBf === 'Y') vBf = '';
+                    if (!kitBt && vLu === 'X') vLu = '';
+                    if (!kitHy && vLu === 'Y') vLu = '';
+                    if (!kitBt && vDi === 'X') vDi = '';
+                    if (!kitHy && vDi === 'Y') vDi = '';
+                    if (!kitBt && vOt === 'X') vOt = '';
+                    if (!kitHy && vOt === 'Y') vOt = '';
+
+                    let hasTargetMeal = (showBf && vBf) || (showLu && vLu) || (showDi && vDi) || (showOt && vOt);
+                    
+                    if(hasTargetMeal) {
+                        if(showBf && vBf) sumBf++;
+                        if(showLu && vLu) sumLu++;
+                        if(showDi && vDi) sumDi++;
+                        if(showOt && vOt) sumOt++;
+
+                        tbodyHtml += `<tr><td style="text-align:center;">${cIdx++}</td>`;
+                        selectedColsToExport.forEach(c => tbodyHtml += `<td>${empObj[c.id] || row[c.id] || ''}</td>`);
+                        if(showBf) tbodyHtml += `<td style="text-align:center; font-weight:bold;">${vBf}</td>`;
+                        if(showLu) tbodyHtml += `<td style="text-align:center; font-weight:bold;">${vLu}</td>`;
+                        if(showDi) tbodyHtml += `<td style="text-align:center; font-weight:bold;">${vDi}</td>`;
+                        if(showOt) tbodyHtml += `<td style="text-align:center; font-weight:bold;">${vOt}</td>`;
+                        tbodyHtml += `<td style="white-space: normal; min-width: 100px;">${row.note || ''}</td></tr>`;
+                    }
+                }
+            }
+        });
+
+        let thHtml = `<th>STT</th>`;
+        selectedColsToExport.forEach(c => thHtml += `<th>${c.name}</th>`);
+        if(showBf) thHtml += `<th>Sáng</th>`;
+        if(showLu) thHtml += `<th>Trưa</th>`;
+        if(showDi) thHtml += `<th>Chiều</th>`;
+        if(showOt) thHtml += `<th>Tăng ca</th>`;
+        thHtml += `<th>Ghi chú</th>`;
+
+        let colspanForTotal = selectedColsToExport.length + 1;
+        let sumRowHtml = `<tr><td colspan="${colspanForTotal}" style="text-align:right; font-weight:bold; color:red; font-size:14px;">TỔNG CỘNG:</td>`;
+        if(showBf) sumRowHtml += `<td style="text-align:center; font-weight:bold; font-size:14px; color:blue;">${sumBf}</td>`;
+        if(showLu) sumRowHtml += `<td style="text-align:center; font-weight:bold; font-size:14px; color:green;">${sumLu}</td>`;
+        if(showDi) sumRowHtml += `<td style="text-align:center; font-weight:bold; font-size:14px; color:purple;">${sumDi}</td>`;
+        if(showOt) sumRowHtml += `<td style="text-align:center; font-weight:bold; font-size:14px; color:red;">${sumOt}</td>`;
+        sumRowHtml += `<td></td></tr>`;
+
+        let kitchenNameArr = [];
+        if(kitBt) kitchenNameArr.push('Bãi Trường');
+        if(kitHy) kitchenNameArr.push('Hyatt');
+
+        let printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            showToast("Trình duyệt đang chặn mở Popup In. Vui lòng cấp quyền (Allow Popup) cho trang web!", "danger");
+            return;
+        }
+
+        printWindow.document.write(`
+            <html><head><title>In Báo Cáo</title>
+            <style>
+                @page { size: A4 ${printOri}; margin: 10mm; }
+                body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; font-size: 11px; }
+                
+                table { 
+                    width: 100%; 
+                    max-width: 100%;
+                    border-collapse: collapse; 
+                    margin-top: 15px; 
+                    table-layout: auto; 
+                }
+                th, td { 
+                    border: 1px solid #000; 
+                    padding: 4px; 
+                    word-break: break-word; 
+                    white-space: normal; 
+                }
+                th { 
+                    background-color: #00693c; 
+                    color: white; 
+                    -webkit-print-color-adjust: exact; 
+                    print-color-adjust: exact;
+                }
+                
+                h2 { margin: 0 0 10px 0; color: #00693c; text-align: center; font-size: 18px; text-transform: uppercase;}
+                .meta { font-size: 12px; color: #555; margin-bottom: 3px; display: flex; justify-content: space-between; }
+            </style>
+            </head><body>
+            <h2>BÁO CÁO DANH SÁCH SUẤT ĂN TỔNG HỢP</h2>
+            <div class="meta">
+                <div><b>Kỳ dữ liệu:</b> ${dStrInput} <br><b>Bếp:</b> ${kitchenNameArr.join(' & ')}</div>
+                <div style="text-align:right;"><b>Thời gian in:</b> ${new Date().toLocaleString('vi-VN')}<br><b>Người in:</b> ${currentUser.name}</div>
+            </div>
+            <table>
+                <thead>
+                    ${sumRowHtml}
+                    <tr>${thHtml}</tr>
+                </thead>
+                <tbody>
+                    ${tbodyHtml}
+                </tbody>
+            </table>
+            <script>window.onload = function() { setTimeout(function() { window.print(); window.close(); }, 500); }<\/script>
+            </body></html>
+        `);
+        printWindow.document.close();
+        if(dpModal) dpModal.hide();
+    }
+
     function renderReports() {
         let dStrInput = document.getElementById('rep-date').value; if(!dStrInput) return;
         let dStart, dEnd; if(dStrInput.includes(' to ')) { let parts = dStrInput.split(' to '); let p1 = parts[0].split('/'); dStart = new Date(p1[2], p1[1]-1, p1[0]); dStart.setHours(0,0,0); let p2 = parts[1].split('/'); dEnd = new Date(p2[2], p2[1]-1, p2[0]); dEnd.setHours(23,59,59); } else { let p1 = dStrInput.split('/'); dStart = new Date(p1[2], p1[1]-1, p1[0]); dStart.setHours(0,0,0); dEnd = new Date(dStart); dEnd.setHours(23,59,59); }
@@ -1894,7 +2558,7 @@
             let empObj = employeeData.find(e => String(e.mnv) === String(row.mnv)) || {}; let status = empObj.leaveStatus || 'Đang làm việc';
             if (!sStatuses.includes(status)) return;
 
-            let deptMatch = (sDepts.length === 0) || sDepts.includes(empObj.bp1) || sDepts.includes(empObj.dept_cap2);
+            let deptMatch = (sDepts.length === 0) || sDepts.includes(empObj.dv) || sDepts.includes(empObj.bp1) || sDepts.includes(empObj.dept_cap2) || sDepts.includes(empObj.bp3) || sDepts.includes(empObj.bp4) || sDepts.includes(empObj.bp5);
             let textMatch = (!sText) || removeAccents(row.mnv).includes(sText) || removeAccents(row.name).includes(sText);
             let bpGocMatch = (sBpGoc.length === 0) || sBpGoc.includes(empObj.bp_goc);
             
@@ -1907,7 +2571,7 @@
                 if (hasMeal) { html.push(`<tr><td>${c++}</td><td class="fw-bold">${row.date}</td>${buildTbodyCols('rep', empObj, false)}<td>${getStyledMealName(row.breakfast)}</td><td>${getStyledMealName(row.lunch)}</td><td>${getStyledMealName(row.dinner)}</td><td class="ot-col">${getStyledMealName(row.ot)}</td><td class="text-start">${row.note || ''}</td></tr>`); }
             }
         });
-        tbody.innerHTML = html.length > 0 ? html.join('') : `<tr><td colspan="${userCols['rep'].length + 7}" class="text-center text-muted">Không có dữ liệu phù hợp</td></tr>`;
+        tbody.innerHTML = html.length > 0 ? html.join('') : `<tr><td colspan="${(userCols['rep']||[]).length + 7}" class="text-center text-muted">Không có dữ liệu phù hợp</td></tr>`;
         document.getElementById('rep-sang').innerText = sumSangBt + sumSangHy; document.getElementById('rep-sang-bt').innerText = sumSangBt; document.getElementById('rep-sang-hy').innerText = sumSangHy; document.getElementById('rep-trua').innerText = sumTruaBt + sumTruaHy; document.getElementById('rep-trua-bt').innerText = sumTruaBt; document.getElementById('rep-trua-hy').innerText = sumTruaHy; document.getElementById('rep-toi').innerText = sumToiBt + sumToiHy; document.getElementById('rep-toi-bt').innerText = sumToiBt; document.getElementById('rep-toi-hy').innerText = sumToiHy; document.getElementById('rep-ot').innerText = sumOtBt + sumOtHy; document.getElementById('rep-ot-bt').innerText = sumOtBt; document.getElementById('rep-ot-hy').innerText = sumOtHy;
     }
     
@@ -1932,17 +2596,58 @@
             let buffer = await response.arrayBuffer();
 
             let outWb = new ExcelJS.Workbook();
+            await outWb.xlsx.load(buffer);
+            
+            outWb.worksheets.forEach(ws => {
+                ws.eachRow((row) => {
+                    row.eachCell((cell) => {
+                        if (cell.type === ExcelJS.ValueType.Formula) {
+                            cell.value = { formula: cell.formula, result: cell.result };
+                        }
+                    });
+                });
+            });
+
+            let wsTemplate = outWb.worksheets[0];
+
             for (let d = 0; d < datesToExport.length; d++) {
-                let tempWb = new ExcelJS.Workbook();
-                await tempWb.xlsx.load(buffer);
-                let ws = tempWb.worksheets[0];
                 let dStr = datesToExport[d];
                 let parts = dStr.split('/');
                 let sName = `${parts[0]}.${parts[1]}`;
-                ws.name = sName;
+                
+                let newSheet = outWb.addWorksheet(sName);
+                
+                newSheet.properties = JSON.parse(JSON.stringify(wsTemplate.properties || {}));
+                newSheet.pageSetup = JSON.parse(JSON.stringify(wsTemplate.pageSetup || {}));
+                newSheet.views = JSON.parse(JSON.stringify(wsTemplate.views || []));
+
+                wsTemplate.columns.forEach((col, index) => {
+                    let newCol = newSheet.getColumn(index + 1);
+                    if(col.width) newCol.width = col.width;
+                    if(col.hidden) newCol.hidden = col.hidden;
+                    if(col.style) newCol.style = col.style;
+                });
+
+                wsTemplate.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+                    if (rowNumber <= 6) {
+                        let newRow = newSheet.getRow(rowNumber);
+                        newRow.height = row.height;
+                        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+                            let newCell = newRow.getCell(colNumber);
+                            newCell.value = cell.value;
+                            newCell.style = cell.style; 
+                        });
+                    }
+                });
+
+                if (wsTemplate.model.merges) {
+                    wsTemplate.model.merges.forEach(m => {
+                        try { newSheet.mergeCells(m); } catch(e){}
+                    });
+                }
                 
                 let filteredEmps = employeeData.filter(e => {
-                    return ((sDepts.length === 0) || sDepts.includes(e.bp1) || sDepts.includes(e.dept_cap2)) 
+                    return ((sDepts.length === 0) || sDepts.includes(e.dv) || sDepts.includes(e.bp1) || sDepts.includes(e.dept_cap2) || sDepts.includes(e.bp3) || sDepts.includes(e.bp4) || sDepts.includes(e.bp5)) 
                         && ((sBpGoc.length === 0) || sBpGoc.includes(e.bp_goc)) 
                         && sStatuses.includes(e.leaveStatus);
                 });
@@ -1950,8 +2655,8 @@
                 let uniqueDepts = [...new Set(filteredEmps.map(e => e.dept_cap2 || e.bp1))].filter(Boolean);
                 let deptPath = uniqueDepts.length === 1 && sDepts.length === 1 ? uniqueDepts[0] : "Cơ sở Phú Quốc";
                 
-                ws.getCell('B2').value = deptPath;
-                ws.getCell('B3').value = `${parts[0]}.${parts[1]}.${parts[2]}`;
+                newSheet.getCell('B2').value = deptPath;
+                newSheet.getCell('B3').value = `${parts[0]}.${parts[1]}.${parts[2]}`;
                 
                 let currentRow = 7; let c = 1;
                 filteredEmps.forEach(e => {
@@ -1967,19 +2672,19 @@
                     let ot = (myMeal && myMeal.ot && myMeal.ot !== '0') ? myMeal.ot : "";
                     let note = myMeal ? (myMeal.note || "") : "";
                     
-                    ws.getRow(currentRow).values = [ c++, e.mnv, e.name, e.bp_goc, e.dept_cap2, bf, lu, di, ot, note ];
+                    let rowVals = [ c++, e.mnv, e.name, e.company, e.bp_goc, e.dept_cap2, bf, lu, di, ot, note ];
                     
-                    for(let i=1; i<=10; i++) {
-                        let dataCell = ws.getCell(currentRow, i);
-                        dataCell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-                        if([1, 2, 4, 5, 6, 7, 8, 9].includes(i)) dataCell.alignment = { horizontal: 'center', vertical: 'middle' }; 
-                    }
+                    rowVals.forEach((val, i) => {
+                        let cell = newSheet.getCell(currentRow, i + 1);
+                        cell.value = val;
+                        cell.style = wsTemplate.getCell(7, i + 1).style; 
+                    });
+                    
                     currentRow++;
                 });
-
-                let newSheet = outWb.addWorksheet(sName);
-                newSheet.model = ws.model; 
             }
+            
+            outWb.removeWorksheet(wsTemplate.id);
 
             const outBuffer = await outWb.xlsx.writeBuffer();
             function formatDateForFile(dStr) { let p = dStr.split('/'); return `${p[0]}.${p[1]}.${p[2].substring(2)}`; }
@@ -2001,7 +2706,11 @@
                 let data = new Uint8Array(e.target.result), workbook = XLSX.read(data, {type: 'array'});
                 let validMeals = [], errors = [];
                 
+                const ignoreSheets = ["Hiệu chỉnh", "Thực tế", "Ăn Sang", "Ăn Trưa", "Ăn Tối", "Tăng Ca", "Tổng hợp"];
+                
                 workbook.SheetNames.forEach(sheetName => {
+                    if (ignoreSheets.includes(sheetName) || sheetName.trim() === "dd.mm.yy") return;
+
                     let worksheet = workbook.Sheets[sheetName];
                     let jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
                     
@@ -2014,11 +2723,25 @@
                     if (!dStrB3 || dStrB3.length < 8) return;
 
                     for(let i = 6; i < jsonData.length; i++) {
-                        let row = jsonData[i]; if(!row || row.length === 0 || !row[1]) continue; if(String(row[1]).includes("MÃ NV")) continue; 
-                        let mnv = String(row[1]).trim(), emp = employeeData.find(e => String(e.mnv) === mnv); if(!emp) { errors.push(`Sheet ${sheetName} - Dòng ${i+1} (${mnv}): Không tìm thấy Mã NV.`); continue; }
+                        let row = jsonData[i]; 
                         
-                        let bf = mapExcelMealValue(row[5]), lu = mapExcelMealValue(row[6]), di = mapExcelMealValue(row[7]), ot = mapExcelMealValue(row[8]), note = row[9] ? String(row[9]).trim() : '';
-                        if(bf === 'INVALID' || lu === 'INVALID' || di === 'INVALID' || ot === 'INVALID') { errors.push(`Sheet ${sheetName} - Dòng ${i+1} (${mnv}): Giá trị suất ăn không hợp lệ.`); continue; }
+                        if(!row || row.length === 0 || !row[1]) continue; 
+                        if(String(row[1]).includes("MÃ NV")) continue; 
+                        
+                        let mnv = String(row[1]).trim(), emp = employeeData.find(e => String(e.mnv) === mnv); 
+                        if(!emp) { errors.push(`Sheet ${sheetName} - Dòng ${i+1} (${mnv}): Không tìm thấy Mã NV.`); continue; }
+                        
+                        let bf = mapExcelMealValue(row[6]), 
+                            lu = mapExcelMealValue(row[7]), 
+                            di = mapExcelMealValue(row[8]), 
+                            ot = mapExcelMealValue(row[9]), 
+                            note = row[10] ? String(row[10]).trim() : '';
+                        
+                        if(bf === 'INVALID' || lu === 'INVALID' || di === 'INVALID' || ot === 'INVALID') { 
+                            errors.push(`Sheet ${sheetName} - Dòng ${i+1} (${mnv}): Giá trị suất ăn không hợp lệ.`); 
+                            continue; 
+                        }
+                        
                         validMeals.push({ mnv: mnv, name: emp.name, date: dStrB3, breakfast: bf, lunch: lu, dinner: di, ot: ot, note: note });
                     }
                 });
@@ -2035,7 +2758,7 @@
                     if(validMeals.length > 0) {
                         if(mode === 'adj') sendAdjustData(validMeals);
                         else sendMealData(validMeals);
-                    } else showToast("File rỗng hoặc không đúng định dạng mẫu.", "danger"); 
+                    } else showToast("File rỗng hoặc không có sheet ngày (dd.mm.yy) hợp lệ.", "danger"); 
                 }
             } catch(err) { showToast("Đã xảy ra lỗi đọc file Excel!", "danger"); }
         }; reader.readAsArrayBuffer(file);
@@ -2047,13 +2770,13 @@
         let dStrInput = document.getElementById('rep-date').value; 
         if(!dStrInput) return showToast("Vui lòng chọn ngày để xuất!", "danger");
         let datesToExport = getDatesInRange(dStrInput);
-        let repType = document.getElementById('rep-export-type').value; 
         
         let sDepts = getCheckedTreeVals('rep-dept-tree');
         let sStatuses = getCheckedStatuses('rep');
         let sBpGoc = getCheckedBpGoc('rep');
+        let isAdjMode = document.getElementById('rep-data-type').value === 'ADJ';
         
-        showToast("Đang tạo báo cáo Excel từ file mẫu...", "info");
+        showToast("Đang tạo báo cáo Excel từ file mẫu, vui lòng đợi...", "info");
         
         const TEMPLATE_URL = 'https://raw.githubusercontent.com/trunghieuappsheet-cell/BMMS/main/upload_baocao_dd.mm.yy.xlsx';
         
@@ -2064,18 +2787,28 @@
 
             let wb = new ExcelJS.Workbook();
             await wb.xlsx.load(buffer);
+
+            wb.worksheets.forEach(ws => {
+                ws.eachRow((row) => {
+                    row.eachCell((cell) => {
+                        if (cell.type === ExcelJS.ValueType.Formula) {
+                            cell.value = { formula: cell.formula, result: cell.result };
+                        }
+                    });
+                });
+            });
             
-            let wsReal = wb.getWorksheet('Thực tế');
-            let wsAdj = wb.getWorksheet('Hiệu chỉnh');
-            let wsBf = wb.getWorksheet('Ăn Sáng');
+            let wsReal = wb.getWorksheet('Thực tế') || wb.getWorksheet('Thực Tế');
+            let wsAdj = wb.getWorksheet('Hiệu chỉnh') || wb.getWorksheet('Hiệu Chỉnh');
+            let wsBf = wb.getWorksheet('Ăn Sáng') || wb.getWorksheet('Ăn Sang');
             let wsLu = wb.getWorksheet('Ăn Trưa');
-            let wsDi = wb.getWorksheet('Ăn Tối');
+            let wsDi = wb.getWorksheet('Ăn Tối') || wb.getWorksheet('Ăn Toi');
             let wsOt = wb.getWorksheet('Tăng Ca');
-            let wsSum = wb.getWorksheet('Tổng hợp');
+            let wsSum = wb.getWorksheet('Tổng hợp') || wb.getWorksheet('Tổng Hợp');
             let wsDailyTemplate = wb.getWorksheet('dd.mm.yy'); 
             
             let filteredEmps = employeeData.filter(e => {
-                return ((sDepts.length === 0) || sDepts.includes(e.bp1) || sDepts.includes(e.dept_cap2)) 
+                return ((sDepts.length === 0) || sDepts.includes(e.dv) || sDepts.includes(e.bp1) || sDepts.includes(e.dept_cap2) || sDepts.includes(e.bp3) || sDepts.includes(e.bp4) || sDepts.includes(e.bp5)) 
                     && ((sBpGoc.length === 0) || sBpGoc.includes(e.bp_goc)) 
                     && sStatuses.includes(e.leaveStatus);
             });
@@ -2083,115 +2816,265 @@
             let realMap = {}, adjMap = {};
             dashboardData.forEach(r => realMap[`${r.mnv}_${r.date}`] = {...r});
             hcData.forEach(r => adjMap[`${r.mnv}_${r.date}`] = {...r});
+
+            let activeEmps = filteredEmps.filter(e => {
+                let hasMeal = false;
+                datesToExport.forEach(dStr => {
+                    let mReal = realMap[`${e.mnv}_${dStr}`] || { breakfast: '0', lunch: '0', dinner: '0', ot: '0' };
+                    let mAdj = adjMap[`${e.mnv}_${dStr}`];
+                    
+                    let a_bf = mAdj ? mAdj.breakfast : mReal.breakfast;
+                    let a_lu = mAdj ? mAdj.lunch : mReal.lunch;
+                    let a_di = mAdj ? mAdj.dinner : mReal.dinner;
+                    let a_ot = mAdj ? mAdj.ot : mReal.ot;
+
+                    if (mReal.breakfast !== '0' || mReal.lunch !== '0' || mReal.dinner !== '0' || mReal.ot !== '0' ||
+                        a_bf !== '0' || a_lu !== '0' || a_di !== '0' || a_ot !== '0') {
+                        hasMeal = true;
+                    }
+                });
+                return hasMeal;
+            });
+
+            let rIdxAgg = 3;
+            let realColSums = [0, 0, 0, 0, 0, 0, 0];
+            let adjColSums = [0, 0, 0, 0, 0, 0, 0];
+            let diffColSums = [0, 0, 0, 0, 0, 0, 0];
+
+            datesToExport.forEach(dStr => {
+                let parts = dStr.split('/');
+                let dayDisp = `${parts[0]}/${parts[1]}`; 
+                
+                let r_btS=0, r_btTr=0, r_btTo=0, r_hyS=0, r_hyTr=0, r_hyTo=0, r_ot=0;
+                let a_btS=0, a_btTr=0, a_btTo=0, a_hyS=0, a_hyTr=0, a_hyTo=0, a_ot=0;
+
+                activeEmps.forEach(e => {
+                    let mReal = realMap[`${e.mnv}_${dStr}`] || { breakfast: '0', lunch: '0', dinner: '0', ot: '0' };
+                    let mAdj = adjMap[`${e.mnv}_${dStr}`];
+
+                    if(mReal.breakfast === 'X') r_btS++; else if(mReal.breakfast === 'Y') r_hyS++;
+                    if(mReal.lunch === 'X') r_btTr++; else if(mReal.lunch === 'Y') r_hyTr++;
+                    if(mReal.dinner === 'X') r_btTo++; else if(mReal.dinner === 'Y') r_hyTo++;
+                    if(mReal.ot === 'X' || mReal.ot === 'Y') r_ot++;
+
+                    let a_bf = mAdj ? mAdj.breakfast : mReal.breakfast;
+                    let a_lu = mAdj ? mAdj.lunch : mReal.lunch;
+                    let a_di = mAdj ? mAdj.dinner : mReal.dinner;
+                    let a_otVal = mAdj ? mAdj.ot : mReal.ot;
+
+                    if(a_bf === 'X') a_btS++; else if(a_bf === 'Y') a_hyS++;
+                    if(a_lu === 'X') a_btTr++; else if(a_lu === 'Y') a_hyTr++;
+                    if(a_di === 'X') a_btTo++; else if(a_di === 'Y') a_hyTo++;
+                    if(a_otVal === 'X' || a_otVal === 'Y') a_ot++;
+                });
+
+                if (rIdxAgg <= 33) {
+                    let rVals = [dayDisp, r_btS, r_btTr, r_btTo, r_hyS, r_hyTr, r_hyTo, r_ot];
+                    let aVals = [dayDisp, a_btS, a_btTr, a_btTo, a_hyS, a_hyTr, a_hyTo, a_ot];
+                    let dVals = [a_btS - r_btS, a_btTr - r_btTr, a_btTo - r_btTo, a_hyS - r_hyS, a_hyTr - r_hyTr, a_hyTo - r_hyTo, a_ot - r_ot];
+
+                    if (wsReal) {
+                        rVals.forEach((v, i) => { wsReal.getCell(rIdxAgg, i + 1).value = v; });
+                        wsReal.getCell(rIdxAgg, 10).value = dayDisp; 
+                        dVals.forEach((v, i) => { wsReal.getCell(rIdxAgg, i + 11).value = v; });
+                    }
+                    if (wsAdj) {
+                        aVals.forEach((v, i) => { wsAdj.getCell(rIdxAgg, i + 1).value = v; });
+                    }
+                    rIdxAgg++;
+                }
+
+                realColSums[0]+=r_btS; realColSums[1]+=r_btTr; realColSums[2]+=r_btTo;
+                realColSums[3]+=r_hyS; realColSums[4]+=r_hyTr; realColSums[5]+=r_hyTo;
+                realColSums[6]+=r_ot;
+
+                adjColSums[0]+=a_btS; adjColSums[1]+=a_btTr; adjColSums[2]+=a_btTo;
+                adjColSums[3]+=a_hyS; adjColSums[4]+=a_hyTr; adjColSums[5]+=a_hyTo;
+                adjColSums[6]+=a_ot;
+
+                diffColSums[0]+=a_btS - r_btS; diffColSums[1]+=a_btTr - r_btTr; diffColSums[2]+=a_btTo - r_btTo;
+                diffColSums[3]+=a_hyS - r_hyS; diffColSums[4]+=a_hyTr - r_hyTr; diffColSums[5]+=a_hyTo - r_hyTo;
+                diffColSums[6]+=a_ot - r_ot;
+            });
+
+            let p = appSettings.mealPrices || { bf: 0, lu: 0, di: 0, ot: 0 };
             
-            const fillDataSheet = (ws, isAdj) => {
+            if (wsReal) {
+                realColSums.forEach((v, i) => { let c = wsReal.getCell(35, i + 2); c.value = v; delete c.formula; });
+                let realMoney = [realColSums[0]*p.bf, realColSums[1]*p.lu, realColSums[2]*p.di, realColSums[3]*p.bf, realColSums[4]*p.lu, realColSums[5]*p.di, realColSums[6]*p.ot];
+                realMoney.forEach((v, i) => { let c = wsReal.getCell(37, i + 2); c.value = v; delete c.formula; });
+                
+                diffColSums.forEach((v, i) => { let c = wsReal.getCell(41, i + 2); c.value = v; delete c.formula; });
+                let diffMoney = [diffColSums[0]*p.bf, diffColSums[1]*p.lu, diffColSums[2]*p.di, diffColSums[3]*p.bf, diffColSums[4]*p.lu, diffColSums[5]*p.di, diffColSums[6]*p.ot];
+                diffMoney.forEach((v, i) => { let c = wsReal.getCell(43, i + 2); c.value = v; delete c.formula; });
+
+                let c45_B = wsReal.getCell(45, 2); c45_B.value = diffColSums[0] + diffColSums[3]; delete c45_B.formula;
+                let c45_D = wsReal.getCell(45, 4); c45_D.value = diffColSums[1] + diffColSums[4]; delete c45_D.formula;
+                let c45_F = wsReal.getCell(45, 6); c45_F.value = diffColSums[2] + diffColSums[5]; delete c45_F.formula;
+                let c45_H = wsReal.getCell(45, 8); c45_H.value = diffColSums[6];                  delete c45_H.formula;
+
+                diffColSums.forEach((v, i) => { let c = wsReal.getCell(35, i + 11); c.value = v; delete c.formula; });
+                diffMoney.forEach((v, i) => { let c = wsReal.getCell(37, i + 11); c.value = v; delete c.formula; });
+            }
+
+            if (wsAdj) {
+                adjColSums.forEach((v, i) => { let c = wsAdj.getCell(35, i + 2); c.value = v; delete c.formula; });
+                let adjMoney = [adjColSums[0]*p.bf, adjColSums[1]*p.lu, adjColSums[2]*p.di, adjColSums[3]*p.bf, adjColSums[4]*p.lu, adjColSums[5]*p.di, adjColSums[6]*p.ot];
+                adjMoney.forEach((v, i) => { let c = wsAdj.getCell(37, i + 2); c.value = v; delete c.formula; });
+            }
+
+            const fillMealDetailSheet = (ws, mealType) => {
                 if(!ws) return;
-                let rIdx = 7; let cIdx = 1;
-                filteredEmps.forEach(e => {
+                let price = p[mealType] || 0;
+
+                datesToExport.forEach((dStr, i) => { 
+                    let parts = dStr.split('/');
+                    ws.getCell(2, 7 + i).value = `${parts[0]}/${parts[1]}`; 
+                });
+                
+                let rIdx = 3; let cIdx = 1;
+                let dailySums = new Array(datesToExport.length).fill(0);
+
+                activeEmps.forEach(e => {
                     let rowData = [cIdx++, e.mnv, e.name, e.company, e.bp_goc, e.dept_cap2];
-                    datesToExport.forEach(dStr => {
+                    let rowSum = 0;
+                    
+                    datesToExport.forEach((dStr, i) => {
                         let mReal = realMap[`${e.mnv}_${dStr}`] || { breakfast: '0', lunch: '0', dinner: '0', ot: '0' };
                         let mAdj = adjMap[`${e.mnv}_${dStr}`];
-                        let fData = isAdj ? {
+                        let fData = isAdjMode ? {
                             bf: mAdj ? mAdj.breakfast : mReal.breakfast, lu: mAdj ? mAdj.lunch : mReal.lunch,
                             di: mAdj ? mAdj.dinner : mReal.dinner, ot: mAdj ? mAdj.ot : mReal.ot
                         } : { bf: mReal.breakfast, lu: mReal.lunch, di: mReal.dinner, ot: mReal.ot };
-                        
-                        let meals = [];
-                        if (fData.bf !== '0') meals.push('S:'+fData.bf);
-                        if (fData.lu !== '0') meals.push('T:'+fData.lu);
-                        if (fData.di !== '0') meals.push('C:'+fData.di);
-                        if (fData.ot !== '0') meals.push('TC:'+fData.ot);
-                        rowData.push(meals.join(', '));
-                    });
-                    ws.getRow(rIdx).values = rowData;
-                    rIdx++;
-                });
-            };
-            fillDataSheet(wsReal, false);
-            fillDataSheet(wsAdj, true);
-            
-            const fillMealSheet = (ws, mealType) => {
-                if(!ws) return;
-                let dateRow = ws.getRow(3);
-                datesToExport.forEach((dStr, i) => { dateRow.getCell(7 + i).value = dStr; });
-                
-                let rIdx = 7; let cIdx = 1;
-                filteredEmps.forEach(e => {
-                    let rowData = [cIdx++, e.mnv, e.name, e.company, e.bp_goc, e.dept_cap2];
-                    datesToExport.forEach(dStr => {
-                        let mReal = realMap[`${e.mnv}_${dStr}`] || { breakfast: '0', lunch: '0', dinner: '0', ot: '0' };
-                        let mAdj = adjMap[`${e.mnv}_${dStr}`];
-                        let fData = {
-                            bf: mAdj ? mAdj.breakfast : mReal.breakfast, lu: mAdj ? mAdj.lunch : mReal.lunch,
-                            di: mAdj ? mAdj.dinner : mReal.dinner, ot: mAdj ? mAdj.ot : mReal.ot
-                        };
+
                         let val = '0';
                         if(mealType==='bf') val = fData.bf;
                         else if(mealType==='lu') val = fData.lu;
                         else if(mealType==='di') val = fData.di;
                         else if(mealType==='ot') val = fData.ot;
                         
-                        rowData.push((val === 'X' || val === 'Y') ? 1 : 0);
+                        let isEaten = (val === 'X' || val === 'Y') ? 1 : 0;
+                        rowData.push(isEaten);
+                        dailySums[i] += isEaten;
+                        rowSum += isEaten;
                     });
-                    ws.getRow(rIdx).values = rowData;
+                    
+                    rowData.forEach((val, colI) => {
+                        ws.getCell(rIdx, colI + 1).value = val;
+                    });
+
+                    let cellSum = ws.getCell(rIdx, 38);
+                    cellSum.value = rowSum; delete cellSum.formula;
+
+                    let cellMoney = ws.getCell(rIdx, 39);
+                    cellMoney.value = rowSum * price; delete cellMoney.formula;
+
                     rIdx++;
                 });
+
+                dailySums.forEach((sumVal, i) => {
+                    let c = ws.getCell(1, 7 + i); c.value = sumVal; delete c.formula;
+                });
             };
-            fillMealSheet(wsBf, 'bf');
-            fillMealSheet(wsLu, 'lu');
-            fillMealSheet(wsDi, 'di');
-            fillMealSheet(wsOt, 'ot');
             
+            fillMealDetailSheet(wsBf, 'bf');
+            fillMealDetailSheet(wsLu, 'lu');
+            fillMealDetailSheet(wsDi, 'di');
+            fillMealDetailSheet(wsOt, 'ot');
+
             if(wsSum) {
-                let dateRow = wsSum.getRow(3);
-                datesToExport.forEach((dStr, i) => { dateRow.getCell(7 + i).value = dStr; });
+                let rIdx = 7; 
+                let cIdx = 1;
                 
-                let rIdx = 7; let cIdx = 1;
-                filteredEmps.forEach(e => {
-                    let rowData = [cIdx++, e.mnv, e.name, e.company, e.bp_goc, e.dept_cap2];
+                activeEmps.forEach(e => {
+                    let sumS = 0, sumTr = 0, sumTo = 0, sumOt = 0;
+                    let notes = [];
+                    
                     datesToExport.forEach(dStr => {
-                        let mReal = realMap[`${e.mnv}_${dStr}`] || { breakfast: '0', lunch: '0', dinner: '0', ot: '0' };
+                        let mReal = realMap[`${e.mnv}_${dStr}`] || { breakfast: '0', lunch: '0', dinner: '0', ot: '0', note: '' };
                         let mAdj = adjMap[`${e.mnv}_${dStr}`];
-                        let fData = {
+                        let fData = isAdjMode ? {
                             bf: mAdj ? mAdj.breakfast : mReal.breakfast, lu: mAdj ? mAdj.lunch : mReal.lunch,
-                            di: mAdj ? mAdj.dinner : mReal.dinner, ot: mAdj ? mAdj.ot : mReal.ot
-                        };
-                        let dailyTotal = 0;
-                        if(fData.bf === 'X' || fData.bf === 'Y') dailyTotal++;
-                        if(fData.lu === 'X' || fData.lu === 'Y') dailyTotal++;
-                        if(fData.di === 'X' || fData.di === 'Y') dailyTotal++;
-                        if(fData.ot === 'X' || fData.ot === 'Y') dailyTotal++;
-                        rowData.push(dailyTotal);
+                            di: mAdj ? mAdj.dinner : mReal.dinner, ot: mAdj ? mAdj.ot : mReal.ot, note: mAdj ? mAdj.note : mReal.note
+                        } : { bf: mReal.breakfast, lu: mReal.lunch, di: mReal.dinner, ot: mReal.ot, note: mReal.note };
+
+                        if(fData.bf === 'X' || fData.bf === 'Y') sumS++;
+                        if(fData.lu === 'X' || fData.lu === 'Y') sumTr++;
+                        if(fData.di === 'X' || fData.di === 'Y') sumTo++;
+                        if(fData.ot === 'X' || fData.ot === 'Y') sumOt++;
+                        if(fData.note && fData.note.trim() !== '') notes.push(fData.note.trim());
                     });
-                    wsSum.getRow(rIdx).values = rowData;
+                    
+                    let uniqueNotes = [...new Set(notes)].join(', ');
+                    let rowVals = [cIdx++, e.mnv, e.name, e.company, e.bp_goc, e.dept_cap2, sumS, sumTr, sumTo, sumOt, uniqueNotes];
+
+                    rowVals.forEach((val, i) => {
+                        wsSum.getCell(rIdx, i + 1).value = val;
+                    });
                     rIdx++;
                 });
             }
             
-            if (repType === 'DETAIL' && wsDailyTemplate) {
+            if (wsDailyTemplate) {
                 datesToExport.forEach(dStr => {
+                    let activeEmpsToday = activeEmps.filter(e => {
+                        let mReal = realMap[`${e.mnv}_${dStr}`] || { breakfast: '0', lunch: '0', dinner: '0', ot: '0' };
+                        let mAdj = adjMap[`${e.mnv}_${dStr}`];
+                        let fData = isAdjMode ? {
+                            bf: mAdj ? mAdj.breakfast : mReal.breakfast, lu: mAdj ? mAdj.lunch : mReal.lunch,
+                            di: mAdj ? mAdj.dinner : mReal.dinner, ot: mAdj ? mAdj.ot : mReal.ot
+                        } : { bf: mReal.breakfast, lu: mReal.lunch, di: mReal.dinner, ot: mReal.ot };
+                        
+                        return fData.bf !== '0' || fData.lu !== '0' || fData.di !== '0' || fData.ot !== '0';
+                    });
+
+                    if(activeEmpsToday.length === 0) return;
+
                     let parts = dStr.split('/');
-                    let sName = `${parts[0]}.${parts[1]}`;
+                    let yShort = parts[2].length === 4 ? parts[2].substring(2) : parts[2];
+                    let sName = `${parts[0]}.${parts[1]}.${yShort}`; 
                     
                     let newSheet = wb.addWorksheet(sName);
-                    newSheet.model = Object.assign(wsDailyTemplate.model, {
-                        mergeCells: wsDailyTemplate.model.mergeCells || [],
-                        name: sName
-                    });
                     
-                    newSheet.getCell('B3').value = dStr;
+                    newSheet.properties = JSON.parse(JSON.stringify(wsDailyTemplate.properties || {}));
+                    newSheet.pageSetup = JSON.parse(JSON.stringify(wsDailyTemplate.pageSetup || {}));
+                    newSheet.views = JSON.parse(JSON.stringify(wsDailyTemplate.views || []));
+
+                    wsDailyTemplate.columns.forEach((col, index) => {
+                        let newCol = newSheet.getColumn(index + 1);
+                        if(col.width) newCol.width = col.width;
+                        if(col.hidden) newCol.hidden = col.hidden;
+                        if(col.style) newCol.style = col.style;
+                    });
+
+                    wsDailyTemplate.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+                        let newRow = newSheet.getRow(rowNumber);
+                        newRow.height = row.height;
+                        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+                            let newCell = newRow.getCell(colNumber);
+                            newCell.value = cell.value;
+                            newCell.style = cell.style; 
+                        });
+                    });
+
+                    if (wsDailyTemplate.model.merges) {
+                        wsDailyTemplate.model.merges.forEach(m => {
+                            try { newSheet.mergeCells(m); } catch(e){}
+                        });
+                    }
+                    
+                    newSheet.getCell('B3').value = `${parts[0]}.${parts[1]}.${parts[2]}`;
                     
                     let rIdx = 7; let cIdx = 1;
-                    filteredEmps.forEach(e => {
+                    
+                    activeEmpsToday.forEach(e => {
                         let mReal = realMap[`${e.mnv}_${dStr}`] || { breakfast: '0', lunch: '0', dinner: '0', ot: '0', note: '' };
                         let mAdj = adjMap[`${e.mnv}_${dStr}`];
-                        let fData = {
-                            bf: mAdj ? mAdj.breakfast : mReal.breakfast,
-                            lu: mAdj ? mAdj.lunch : mReal.lunch,
-                            di: mAdj ? mAdj.dinner : mReal.dinner,
-                            ot: mAdj ? mAdj.ot : mReal.ot,
-                            note: mAdj ? mAdj.note : mReal.note
+                        let fData = isAdjMode ? {
+                            bf: mAdj ? mAdj.breakfast : mReal.breakfast, lu: mAdj ? mAdj.lunch : mReal.lunch,
+                            di: mAdj ? mAdj.dinner : mReal.dinner, ot: mAdj ? mAdj.ot : mReal.ot, note: mAdj ? mAdj.note : mReal.note
+                        } : {
+                            bf: mReal.breakfast, lu: mReal.lunch, di: mReal.dinner, ot: mReal.ot, note: mReal.note
                         };
                         
                         let bfZ = (fData.bf === '0') ? '' : fData.bf;
@@ -2199,24 +3082,26 @@
                         let diZ = (fData.di === '0') ? '' : fData.di;
                         let otZ = (fData.ot === '0') ? '' : fData.ot;
 
-                        newSheet.getRow(rIdx).values = [cIdx++, e.mnv, e.name, e.company, e.bp_goc, e.dept_cap2, bfZ, luZ, diZ, otZ, fData.note];
+                        let rowVals = [cIdx++, e.mnv, e.name, e.company, e.bp_goc, e.dept_cap2, bfZ, luZ, diZ, otZ, fData.note];
+                        
+                        rowVals.forEach((val, i) => {
+                            newSheet.getCell(rIdx, i + 1).value = val;
+                        });
                         rIdx++;
                     });
                 });
-            }
-            
-            if (wsDailyTemplate) {
+                
                 wb.removeWorksheet(wsDailyTemplate.id);
             }
 
             const outBuffer = await wb.xlsx.writeBuffer();
             let fname = dStrInput.includes(' to ') ? dStrInput.replace(' to ', '-') : dStrInput;
             saveAs(new Blob([outBuffer]), `BaoCao_SuatAn_${fname.replace(/\//g, '.')}.xlsx`);
-            showToast("Đã tải Báo cáo thành công!", "success");
+            showToast("Đã xuất báo cáo và file Upload thành công!", "success");
 
         } catch (error) {
             console.error("Lỗi tạo file excel:", error);
-            showToast("Lỗi khi tải file báo cáo! Vui lòng kiểm tra lại mạng hoặc link.", "danger");
+            showToast("Lỗi khi tải file báo cáo! Vui lòng kiểm tra lại mạng hoặc link mẫu.", "danger");
         }
     }
 
@@ -2407,7 +3292,7 @@
 
         employeeData.forEach(e => {
             let matchText = (!sText) || removeAccents(e.name).includes(sText) || removeAccents(e.mnv).includes(sText); 
-            let matchDept = (sDepts.length === 0) || sDepts.includes(e.bp1) || sDepts.includes(e.dept_cap2);
+            let matchDept = (sDepts.length === 0) || sDepts.includes(e.dv) || sDepts.includes(e.bp1) || sDepts.includes(e.dept_cap2) || sDepts.includes(e.bp3) || sDepts.includes(e.bp4) || sDepts.includes(e.bp5);
             let matchBpGoc = (sBpGoc.length === 0) || sBpGoc.includes(e.bp_goc);
             
             if(!matchText || !matchDept || !matchBpGoc || !sStatuses.includes(e.leaveStatus)) return;
@@ -2434,7 +3319,7 @@
             
             html.push(`<tr class="${trClass}" data-mnv="${mnv}" data-name="${e.name}"><td>${c++}</td>${buildTbodyCols('ro', e, false)}<td class="align-middle">${selBf}</td><td class="align-middle">${selLu}</td><td class="align-middle">${selDi}</td><td class="align-middle ot-col">${selOT}</td><td class="align-middle">${inpNote}</td><td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="clearMealRow(this, '${mnv}', '${dDisplay}', false)" title="Xóa chọn dòng này"><i class="fa-solid fa-trash"></i></button></td></tr>`);
         });
-        tbody.innerHTML = html.length > 0 ? html.join('') : `<tr><td colspan="${userCols['ro'].length + 6}" class="text-center text-muted">Không tìm thấy NV</td></tr>`; enforceOtSelectPermission();
+        tbody.innerHTML = html.length > 0 ? html.join('') : `<tr><td colspan="${(userCols['ro']||[]).length + 6}" class="text-center text-muted">Không tìm thấy NV</td></tr>`; enforceOtSelectPermission();
     }
     
     function submitRegOthersGrid() {
@@ -2474,7 +3359,7 @@
 
         employeeData.forEach(e => {
             let matchText = (!sText) || removeAccents(e.name).includes(sText) || removeAccents(e.mnv).includes(sText); 
-            let matchDept = (sDepts.length === 0) || sDepts.includes(e.bp1) || sDepts.includes(e.dept_cap2);
+            let matchDept = (sDepts.length === 0) || sDepts.includes(e.dv) || sDepts.includes(e.bp1) || sDepts.includes(e.dept_cap2) || sDepts.includes(e.bp3) || sDepts.includes(e.bp4) || sDepts.includes(e.bp5);
             let matchBpGoc = (sBpGoc.length === 0) || sBpGoc.includes(e.bp_goc);
             
             if(!matchText || !matchDept || !matchBpGoc || !sStatuses.includes(e.leaveStatus)) return;
@@ -2501,7 +3386,7 @@
             
             html.push(`<tr class="${trClass}" data-mnv="${mnv}" data-name="${e.name}"><td>${c++}</td>${buildTbodyCols('adj', e, false)}<td class="align-middle">${selBf}</td><td class="align-middle">${selLu}</td><td class="align-middle">${selDi}</td><td class="align-middle ot-col">${selOT}</td><td class="align-middle">${inpNote}</td><td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="clearMealRow(this, '${mnv}', '${dDisplay}', true)" title="Về 0"><i class="fa-solid fa-trash"></i></button></td></tr>`);
         });
-        tbody.innerHTML = html.length > 0 ? html.join('') : `<tr><td colspan="${userCols['adj'].length + 6}" class="text-center text-muted">Không tìm thấy NV</td></tr>`; enforceOtSelectPermission();
+        tbody.innerHTML = html.length > 0 ? html.join('') : `<tr><td colspan="${(userCols['adj']||[]).length + 6}" class="text-center text-muted">Không tìm thấy NV</td></tr>`; enforceOtSelectPermission();
     }
     
     function submitAdjustGrid() {
@@ -2535,7 +3420,15 @@
         if(dStrInput.includes(' to ')) { let parts = dStrInput.split(' to '); let p1 = parts[0].split('/'); dStart = new Date(p1[2], p1[1]-1, p1[0]); dStart.setHours(0,0,0); let p2 = parts[1].split('/'); dEnd = new Date(p2[2], p2[1]-1, p2[0]); dEnd.setHours(23,59,59); } 
         else { let p1 = dStrInput.split('/'); dStart = new Date(p1[2], p1[1]-1, p1[0]); dStart.setHours(0,0,0); dEnd = new Date(dStart); dEnd.setHours(23,59,59); }
 
-        let sText = removeAccents(document.getElementById('unreg-search').value), sDepts = getCheckedTreeVals('unreg-dept-tree'), sStatuses = getCheckedStatuses('unreg'), sBpGoc = getCheckedBpGoc('unreg'), registeredMnvSet = new Set(), mealMapForDate = {};
+        let sText = removeAccents(document.getElementById('unreg-search').value), 
+            sDepts = getCheckedTreeVals('unreg-dept-tree'), 
+            sStatuses = getCheckedStatuses('unreg'), 
+            sBpGoc = getCheckedBpGoc('unreg'), 
+            registeredMnvSet = new Set(), 
+            mealMapForDate = {};
+
+        let groupByField = document.getElementById('unreg-group-by') ? document.getElementById('unreg-group-by').value : 'dept_cap2';
+
         dashboardData.forEach(row => {
             let cleanDate = String(row.date).trim(); let rd; if(cleanDate.includes('/')) { let p = cleanDate.split('/'); rd = new Date(p[2], parseInt(p[1])-1, p[0], 12, 0, 0); } else { rd = new Date(cleanDate); }
             if (rd >= dStart && rd <= dEnd) { mealMapForDate[String(row.mnv).trim()] = row; if ((row.breakfast && row.breakfast !== '0') || (row.lunch && row.lunch !== '0') || (row.dinner && row.dinner !== '0') || (row.ot && row.ot !== '0')) registeredMnvSet.add(String(row.mnv).trim()); }
@@ -2544,9 +3437,10 @@
         let totalCounts = {}, unregCounts = {}; unregDataCache = {}; 
         employeeData.forEach(emp => {
             if (!sStatuses.includes(emp.leaveStatus)) return; 
-            let matchDept = (sDepts.length === 0) || sDepts.includes(emp.bp1) || sDepts.includes(emp.dept_cap2);
+            let matchDept = (sDepts.length === 0) || sDepts.includes(emp.dv) || sDepts.includes(emp.bp1) || sDepts.includes(emp.dept_cap2) || sDepts.includes(emp.bp3) || sDepts.includes(emp.bp4) || sDepts.includes(emp.bp5);
             let matchBpGoc = (sBpGoc.length === 0) || sBpGoc.includes(emp.bp_goc);
-            let dept = emp.dept_cap2 ? emp.dept_cap2 : (emp.bp1 ? emp.bp1 : 'Khác');
+            
+            let dept = emp[groupByField] ? emp[groupByField] : 'Khác';
 
             if (matchDept && matchBpGoc) {
                 totalCounts[dept] = (totalCounts[dept] || 0) + 1;
@@ -2557,13 +3451,130 @@
                 if (!registeredMnvSet.has(eMnv)) { unregCounts[dept] = (unregCounts[dept] || 0) + 1; if (matchSearch) unregDataCache[dept].unreg.push({ emp: emp, meal: null }); } 
                 else { if (matchSearch) unregDataCache[dept].reg.push({ emp: emp, meal: mealMapForDate[eMnv] }); }
             }
-        }); renderUnregChart(unregCounts, totalCounts);
+        }); 
+        
+        renderUnregChart(unregCounts, totalCounts);
     }
 
     function renderUnregChart(unregCounts, totalCounts) {
-        let ctx = document.getElementById('unregChart').getContext('2d'); if (unregChartInstance) unregChartInstance.destroy();
-        let labels = Object.keys(totalCounts), registeredData = labels.map(l => (totalCounts[l] || 0) - (unregCounts[l] || 0)), unregData = labels.map(l => unregCounts[l] || 0);
-        unregChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [ { label: 'Đã đăng ký', data: registeredData, backgroundColor: 'rgba(25, 135, 84, 0.9)', barPercentage: 0.6 }, { label: 'Chưa Đăng Ký', data: unregData, backgroundColor: 'rgba(220, 53, 69, 0.9)', barPercentage: 0.6 } ] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }, y: { stacked: true, ticks: { autoSkip: false } } }, plugins: { legend: { display: true, position: 'bottom' }, tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw; } } } }, onClick: (e, elements) => { if (elements.length > 0) { let index = elements[0].index; let dept = unregChartInstance.data.labels[index]; showUnregDetails(dept); } } } });
+        let canvas = document.getElementById('unregChart');
+        let ctx = canvas.getContext('2d'); 
+        if (unregChartInstance) unregChartInstance.destroy();
+        
+        let labels = Object.keys(totalCounts);
+        let registeredData = labels.map(l => (totalCounts[l] || 0) - (unregCounts[l] || 0));
+        let unregData = labels.map(l => unregCounts[l] || 0);
+
+        let minHeight = labels.length * 40 + 150; 
+        canvas.parentElement.style.height = `max(70vh, ${minHeight}px)`;
+
+        let totalReg = registeredData.reduce((a, b) => a + b, 0);
+        let totalAll = labels.map(l => totalCounts[l] || 0).reduce((a, b) => a + b, 0);
+        let totalPct = totalAll > 0 ? Math.round((totalReg / totalAll) * 100) : 0;
+
+        const progressLabelPlugin = {
+            id: 'progressLabelPlugin',
+            afterDatasetsDraw(chart) {
+                const { ctx, data } = chart;
+                ctx.save();
+                ctx.font = 'bold 12px Arial';
+                ctx.textBaseline = 'middle';
+                
+                let meta = chart.getDatasetMeta(1); 
+                
+                data.labels.forEach((label, index) => {
+                    let reg = data.datasets[0].data[index];
+                    let unreg = data.datasets[1].data[index];
+                    let total = reg + unreg;
+                    if (total === 0) return;
+                    
+                    let pct = Math.round((reg / total) * 100);
+                    let text = ` ${reg} / ${total} (${pct}%)`;
+                    
+                    if (meta.data[index]) {
+                        let yPos = meta.data[index].y;
+                        let xPos = meta.data[index].x; 
+                        
+                        ctx.textAlign = 'left';
+                        ctx.fillStyle = '#000000'; 
+                        ctx.fillText(text, xPos + 8, yPos); 
+                    }
+                });
+                ctx.restore();
+            }
+        };
+
+        unregChartInstance = new Chart(ctx, { 
+            type: 'bar', 
+            data: { 
+                labels: labels, 
+                datasets: [ 
+                    { 
+                        label: 'Đã hoàn thành', 
+                        data: registeredData, 
+                        backgroundColor: '#00a651', 
+                        borderColor: '#007a3b',
+                        borderWidth: 1,
+                        barPercentage: 0.7 
+                    }, 
+                    { 
+                        label: 'Chưa đăng ký', 
+                        data: unregData, 
+                        backgroundColor: '#ffffff', 
+                        borderColor: '#adb5bd', 
+                        borderWidth: 1,
+                        barPercentage: 0.7
+                    } 
+                ] 
+            }, 
+            plugins: [progressLabelPlugin], 
+            options: { 
+                indexAxis: 'y', 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                layout: {
+                    padding: { right: 100 } 
+                },
+                scales: { 
+                    x: { 
+                        stacked: true, 
+                        beginAtZero: true, 
+                        ticks: { stepSize: 1, precision: 0 },
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' } 
+                    }, 
+                    y: { 
+                        stacked: true, 
+                        ticks: { autoSkip: false, font: { weight: '600' } },
+                        grid: { display: false } 
+                    } 
+                }, 
+                plugins: { 
+                    title: {
+                        display: true,
+                        text: `TỔNG TIẾN ĐỘ: HOÀN THÀNH ${totalReg} / ${totalAll} (${totalPct}%)`,
+                        font: { size: 16, weight: 'bold' },
+                        color: '#00a651',
+                        padding: { bottom: 20 }
+                    },
+                    legend: { display: true, position: 'bottom' }, 
+                    tooltip: { 
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderWidth: 0,
+                        padding: 10,
+                        callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw; } } 
+                    } 
+                }, 
+                onClick: (e, elements) => { 
+                    if (elements.length > 0) { 
+                        let index = elements[0].index; 
+                        let dept = unregChartInstance.data.labels[index]; 
+                        showUnregDetails(dept); 
+                    } 
+                } 
+            } 
+        });
     }
 
     function showUnregDetails(dept) {
@@ -2584,45 +3595,120 @@
         let ws = XLSX.utils.aoa_to_sheet(exportData); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "ChiTiet"); XLSX.writeFile(wb, `DS_${currentUnregDept}.xlsx`);
     }
 
-    function exportEmployeesExcel() {
-        let exportData = [ ["DANH SÁCH NHÂN SỰ TOÀN HỆ THỐNG"], ["Ngày xuất:", new Date().toLocaleDateString('vi-VN')], [], [], [], ["Mã NV", "Họ Tên", "Giới tính", "SĐT", "CCCD", "Email", "Đơn vị", "Bộ phận cấp 1", "Bộ phận cấp 2", "Bộ phận cấp 3", "Bộ phận cấp 4", "Bộ phận cấp 5", "BP Chấm công gốc", "Công ty", "Chức danh", "Ngày gia nhập", "Tình trạng", "Ngày nghỉ", "Phân quyền"] ];
-        employeeData.forEach(e => { exportData.push([e.mnv, e.name, e.gender, e.phone, e.cccd, e.email, e.dv, e.bp1, e.dept_cap2, e.bp3, e.bp4, e.bp5, e.bp_goc, e.company, e.title, e.joinDate, e.leaveStatus, e.leaveDate, e.role]); });
-        let ws = XLSX.utils.aoa_to_sheet(exportData); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "NhanSu"); XLSX.writeFile(wb, `DanhSachNhanSu_${toDDMMYYYY(new Date())}.xlsx`);
+    async function exportEmployeesExcel() {
+        showToast("Đang tạo file Excel Nhân sự...", "info");
+        const TEMPLATE_URL = 'https://raw.githubusercontent.com/trunghieuappsheet-cell/BMMS/main/upload_dsnv_dd.mm.yy.xlsx';
+        
+        try {
+            let response = await fetch(TEMPLATE_URL);
+            if (!response.ok) throw new Error("Không thể tải file mẫu.");
+            let buffer = await response.arrayBuffer();
+
+            let wb = new ExcelJS.Workbook();
+            await wb.xlsx.load(buffer);
+            
+            wb.worksheets.forEach(ws => {
+                ws.eachRow((row) => {
+                    row.eachCell((cell) => {
+                        if (cell.type === ExcelJS.ValueType.Formula) {
+                            cell.value = { formula: cell.formula, result: cell.result };
+                        }
+                    });
+                });
+            });
+            
+            let ws = wb.worksheets[0]; 
+            
+            let rIdx = 5; 
+            let cIdx = 1;
+            
+            employeeData.forEach(e => {
+                let rowVals = [
+                    cIdx++, e.mnv, e.name, e.gender, e.phone, e.cccd, e.email, e.dv, e.bp1, e.dept_cap2, e.bp3, e.bp4, e.bp5, e.bp_goc, e.company, e.title, e.joinDate, e.leaveStatus, e.leaveDate, e.role
+                ];
+                
+                rowVals.forEach((val, i) => {
+                    let cell = ws.getCell(rIdx, i + 1);
+                    cell.value = val;
+                    cell.style = ws.getCell(5, i + 1).style; 
+                });
+                
+                rIdx++;
+            });
+
+            const outBuffer = await wb.xlsx.writeBuffer();
+            saveAs(new Blob([outBuffer]), `DanhSachNhanSu_${toDDMMYYYY(new Date()).replace(/\//g, '.')}.xlsx`);
+            showToast("Đã tải Danh sách nhân sự thành công!", "success");
+
+        } catch (error) {
+            console.error("Lỗi tạo file excel:", error);
+            let exportData = [ 
+                ["DANH SÁCH NHÂN SỰ TOÀN HỆ THỐNG"], 
+                ["Ngày xuất:", new Date().toLocaleDateString('vi-VN')], 
+                [], 
+                ["STT", "MÃ NV", "Họ Và Tên", "Giới tính", "SĐT", "CCCD", "Email công ty", "Đơn vị", "Bộ phận cấp 1", "Bộ phận cấp 2", "Bộ phận cấp 3", "Bộ phận cấp 4", "Bộ phận cấp 5", "Bộ phận chấm công gốc", "Tên công ty", "Chức danh", "Ngày gia nhập", "Tình trạng", "Ngày nghỉ", "Phân quyền"] 
+            ];
+            let c = 1;
+            employeeData.forEach(e => { exportData.push([c++, e.mnv, e.name, e.gender, e.phone, e.cccd, e.email, e.dv, e.bp1, e.dept_cap2, e.bp3, e.bp4, e.bp5, e.bp_goc, e.company, e.title, e.joinDate, e.leaveStatus, e.leaveDate, e.role]); });
+            let wsFallback = XLSX.utils.aoa_to_sheet(exportData); let wbFallback = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wbFallback, wsFallback, "NhanSu"); XLSX.writeFile(wbFallback, `DanhSachNhanSu_${toDDMMYYYY(new Date())}.xlsx`);
+        }
     }
 
     function handleEmployeeExcelUpload(event) {
-        let file = event.target.files[0]; if(!file) return; showToast("Đang đọc file Excel Nhân sự...", "info"); let reader = new FileReader();
+        let file = event.target.files[0]; if(!file) return; 
+        showToast("Đang đọc file Excel Nhân sự...", "info"); 
+        let reader = new FileReader();
         reader.onload = async function(e) {
             try {
-                let data = new Uint8Array(e.target.result), workbook = XLSX.read(data, {type: 'array'}), worksheet = workbook.Sheets[workbook.SheetNames[0]], jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1}), empList = [];
-                for(let i = 6; i < jsonData.length; i++) { 
-                    let row = jsonData[i]; if(!row || row.length === 0 || !row[0]) continue;
+                let data = new Uint8Array(e.target.result);
+                let workbook = XLSX.read(data, {type: 'array'});
+                let worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                let jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                let empList = [];
+                
+                for(let i = 4; i < jsonData.length; i++) { 
+                    let row = jsonData[i]; 
+                    if(!row || row.length === 0 || !row[1]) continue;
+                    
                     empList.push({
-                        mnv: String(row[0]||'').trim(),
-                        name: row[1] === undefined ? undefined : String(row[1]).trim(),
-                        gender: row[2] === undefined ? undefined : String(row[2]).trim(),
-                        phone: row[3] === undefined ? undefined : String(row[3]).trim(),
-                        cccd: row[4] === undefined ? undefined : String(row[4]).trim(),
-                        email: row[5] === undefined ? undefined : String(row[5]).trim(),
-                        dv: row[6] === undefined ? undefined : String(row[6]).trim(),
-                        bp1: row[7] === undefined ? undefined : String(row[7]).trim(),
-                        bp2: row[8] === undefined ? undefined : String(row[8]).trim(),
-                        bp3: row[9] === undefined ? undefined : String(row[9]).trim(),
-                        bp4: row[10] === undefined ? undefined : String(row[10]).trim(),
-                        bp5: row[11] === undefined ? undefined : String(row[11]).trim(),
-                        bp_goc: row[12] === undefined ? undefined : String(row[12]).trim(),
-                        company: row[13] === undefined ? undefined : String(row[13]).trim(),
-                        title: row[14] === undefined ? undefined : String(row[14]).trim(),
-                        joinDate: row[15] === undefined ? undefined : String(row[15]).trim(),
-                        leaveStatus: row[16] === undefined ? undefined : String(row[16]).trim(),
-                        leaveDate: row[17] === undefined ? undefined : String(row[17]).trim(),
-                        role: row[18] === undefined ? undefined : String(row[18]).trim()
+                        mnv: String(row[1]||'').trim(),
+                        name: row[2] === undefined ? undefined : String(row[2]).trim(),
+                        gender: row[3] === undefined ? undefined : String(row[3]).trim(),
+                        phone: row[4] === undefined ? undefined : String(row[4]).trim(),
+                        cccd: row[5] === undefined ? undefined : String(row[5]).trim(),
+                        email: row[6] === undefined ? undefined : String(row[6]).trim(),
+                        dv: row[7] === undefined ? undefined : String(row[7]).trim(),
+                        bp1: row[8] === undefined ? undefined : String(row[8]).trim(),
+                        bp2: row[9] === undefined ? undefined : String(row[9]).trim(),
+                        bp3: row[10] === undefined ? undefined : String(row[10]).trim(),
+                        bp4: row[11] === undefined ? undefined : String(row[11]).trim(),
+                        bp5: row[12] === undefined ? undefined : String(row[12]).trim(),
+                        bp_goc: row[13] === undefined ? undefined : String(row[13]).trim(),
+                        company: row[14] === undefined ? undefined : String(row[14]).trim(),
+                        title: row[15] === undefined ? undefined : String(row[15]).trim(),
+                        joinDate: row[16] === undefined ? undefined : String(row[16]).trim(),
+                        leaveStatus: row[17] === undefined ? undefined : String(row[17]).trim(),
+                        leaveDate: row[18] === undefined ? undefined : String(row[18]).trim(),
+                        role: row[19] === undefined ? undefined : String(row[19]).trim()
                     });
                 }
-                event.target.value = ""; if(empList.length === 0) return showToast("File không có dữ liệu nhân sự!", "danger");
-                enqueueTask({ action: 'bulk_save_employees', user: currentUser, data: empList }, "Đang lưu nhân sự...", async (res) => { if(res.success) { showToast(res.message, "success"); await reloadEmployeeData(); filterEmployees(); } else { showToast(res.message, "danger"); } });
-            } catch(err) { showToast("Lỗi định dạng file Excel!", "danger"); }
-        }; reader.readAsArrayBuffer(file);
+                event.target.value = ""; 
+                if(empList.length === 0) return showToast("File không có dữ liệu nhân sự hợp lệ!", "danger");
+                
+                enqueueTask({ action: 'bulk_save_employees', user: currentUser, data: empList }, "Đang lưu nhân sự...", async (res) => { 
+                    if(res.success) { 
+                        showToast(res.message, "success"); 
+                        await reloadEmployeeData(); 
+                        filterEmployees(); 
+                    } else { 
+                        showToast(res.message, "danger"); 
+                    } 
+                });
+            } catch(err) { 
+                showToast("Lỗi định dạng file Excel!", "danger"); 
+            }
+        }; 
+        reader.readAsArrayBuffer(file);
     }
 
     let inlineEditMode = false;
@@ -2636,7 +3722,7 @@
         let sText = removeAccents(document.getElementById('emp-search').value), sRole = document.getElementById('emp-role-filter').value, sDepts = getCheckedTreeVals('emp-dept-tree'), sStatuses = getCheckedStatuses('emp'), sBpGoc = getCheckedBpGoc('emp');
         let filtered = employeeData.filter(emp => {
             let matchRole = (sRole === '') || (sRole === 'EMPTY' && !emp.role) || (emp.role === sRole);
-            let matchDept = (sDepts.length === 0) || sDepts.includes(emp.bp1) || sDepts.includes(emp.dept_cap2);
+            let matchDept = (sDepts.length === 0) || sDepts.includes(emp.dv) || sDepts.includes(emp.bp1) || sDepts.includes(emp.dept_cap2) || sDepts.includes(emp.bp3) || sDepts.includes(emp.bp4) || sDepts.includes(emp.bp5);
             let matchText = (!sText) || removeAccents(emp.mnv).includes(sText) || removeAccents(emp.name).includes(sText);
             let matchStatus = sStatuses.includes(emp.leaveStatus || 'Đang làm việc');
             let matchBpGoc = (sBpGoc.length === 0) || sBpGoc.includes(emp.bp_goc);
@@ -2665,46 +3751,230 @@
     }
 
     let empModal;
+    
+    function addCongTacRow() {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" class="form-control form-control-sm ct-mnv border-primary" placeholder="Nhập mã NV..."></td>
+            <td><input type="text" class="form-control form-control-sm ct-name border-primary" placeholder="Họ và tên"></td>
+            <td><input type="text" class="form-control form-control-sm ct-phone border-primary" placeholder="09xxxx"></td>
+            <td><input type="text" class="form-control form-control-sm ct-company" list="list-company" placeholder="Công ty"></td>
+            <td><input type="text" class="form-control form-control-sm ct-bpgoc" list="list-bpgoc" placeholder="BP Chấm công"></td>
+            <td class="text-center"><button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="this.closest('tr').remove()" title="Xóa"><i class="fa-solid fa-trash"></i></button></td>
+        `;
+        document.getElementById('congtac-tbody').appendChild(tr);
+    }
+
     function openEmpModal(emp = null) {
         if(!empModal) empModal = new bootstrap.Modal(document.getElementById('empModal'));
         let typeTabsWrap = document.getElementById('emp-type-tabs');
+        
         if (emp) {
-            typeTabsWrap.classList.add('d-none'); document.querySelectorAll('.emp-field').forEach(el => el.classList.remove('d-none'));
-            document.getElementById('mod-mnv').value = emp.mnv; document.getElementById('mod-name').value = emp.name; document.getElementById('mod-gender').value = emp.gender; document.getElementById('mod-phone').value = emp.phone; document.getElementById('mod-cccd').value = emp.cccd; document.getElementById('mod-email').value = emp.email; document.getElementById('mod-title').value = emp.title; document.getElementById('mod-dv').value = emp.dv; document.getElementById('mod-bp_goc').value = emp.bp_goc; document.getElementById('mod-bp1').value = emp.bp1; document.getElementById('mod-bp2').value = emp.dept_cap2; document.getElementById('mod-bp3').value = emp.bp3 || ''; document.getElementById('mod-bp4').value = emp.bp4 || ''; document.getElementById('mod-bp5').value = emp.bp5 || ''; document.getElementById('mod-company').value = emp.company || ''; document.getElementById('mod-join').value = emp.joinDate ? parseDateToInput(emp.joinDate) : ''; document.getElementById('mod-role').value = emp.role || ''; document.getElementById('mod-leave').value = emp.leaveStatus || 'Đang làm việc'; document.getElementById('mod-leave-date').value = emp.leaveDate ? parseDateToInput(emp.leaveDate) : ''; document.getElementById('mod-mnv').readOnly = true;
+            typeTabsWrap.classList.add('d-none'); 
+            document.getElementById('emp-form').classList.remove('d-none');
+            
+            let ctContainer = document.getElementById('emp-congtac-container');
+            if(ctContainer) ctContainer.classList.add('d-none');
+            let guestContainer = document.getElementById('emp-guest-container');
+            if(guestContainer) guestContainer.classList.add('d-none');
+            
+            document.querySelectorAll('.emp-field').forEach(el => el.classList.remove('d-none'));
+            document.getElementById('mod-mnv').value = emp.mnv; 
+            document.getElementById('mod-name').value = emp.name; 
+            document.getElementById('mod-gender').value = emp.gender; 
+            document.getElementById('mod-phone').value = emp.phone; 
+            document.getElementById('mod-cccd').value = emp.cccd; 
+            document.getElementById('mod-email').value = emp.email; 
+            document.getElementById('mod-title').value = emp.title; 
+            document.getElementById('mod-dv').value = emp.dv; 
+            document.getElementById('mod-bp_goc').value = emp.bp_goc; 
+            document.getElementById('mod-bp1').value = emp.bp1; 
+            document.getElementById('mod-bp2').value = emp.dept_cap2; 
+            document.getElementById('mod-bp3').value = emp.bp3 || ''; 
+            document.getElementById('mod-bp4').value = emp.bp4 || ''; 
+            document.getElementById('mod-bp5').value = emp.bp5 || ''; 
+            document.getElementById('mod-company').value = emp.company || ''; 
+            document.getElementById('mod-join').value = emp.joinDate ? parseDateToInput(emp.joinDate) : ''; 
+            document.getElementById('mod-role').value = emp.role || ''; 
+            document.getElementById('mod-leave').value = emp.leaveStatus || 'Đang làm việc'; 
+            document.getElementById('mod-leave-date').value = emp.leaveDate ? parseDateToInput(emp.leaveDate) : ''; 
+            document.getElementById('mod-mnv').readOnly = true;
         } else {
-            typeTabsWrap.classList.remove('d-none'); changeEmpType('NORMAL', typeTabsWrap.querySelector('.nav-link'));
-            document.getElementById('mod-name').value = ''; document.getElementById('mod-gender').value = ''; document.getElementById('mod-phone').value = ''; document.getElementById('mod-cccd').value = ''; document.getElementById('mod-email').value = ''; document.getElementById('mod-title').value = ''; document.getElementById('mod-dv').value = ''; document.getElementById('mod-bp_goc').value = ''; document.getElementById('mod-bp1').value = ''; document.getElementById('mod-bp2').value = ''; document.getElementById('mod-bp3').value = ''; document.getElementById('mod-bp4').value = ''; document.getElementById('mod-bp5').value = ''; document.getElementById('mod-company').value = ''; document.getElementById('mod-join').value = ''; document.getElementById('mod-role').value = ''; document.getElementById('mod-leave').value = 'Đang làm việc'; document.getElementById('mod-leave-date').value = '';
-        } empModal.show();
+            typeTabsWrap.classList.remove('d-none'); 
+            changeEmpType('NORMAL', typeTabsWrap.querySelector('.nav-link'));
+        } 
+        empModal.show();
     }
 
     function changeEmpType(t, el) {
-        if(el) { document.querySelectorAll('#emp-type-tabs .nav-link').forEach(link => link.classList.remove('active', 'text-bim')); el.classList.add('active', 'text-bim'); }
-        currentEmpType = t; document.querySelectorAll('.emp-field').forEach(el => el.classList.add('d-none'));
-        if(t === 'NORMAL') { document.querySelectorAll('.emp-field').forEach(el => el.classList.remove('d-none')); document.getElementById('mod-mnv').readOnly = false; document.getElementById('mod-mnv').value = ""; document.getElementById('mod-mnv').placeholder = "VD: BIM0123"; } 
-        else if (t === 'CONG_TAC') { document.querySelectorAll('.emp-field-ct').forEach(el => el.classList.remove('d-none')); document.getElementById('mod-mnv').readOnly = false; document.getElementById('mod-mnv').value = ""; document.getElementById('mod-mnv').placeholder = "Nhập Mã NV..."; } 
-        else if (t === 'GUEST') { document.querySelectorAll('.emp-field-guest').forEach(el => el.classList.remove('d-none')); document.getElementById('mod-mnv').readOnly = true; document.getElementById('mod-mnv').value = "K_" + Math.floor(Math.random()*100000); }
+        if(el) { 
+            document.querySelectorAll('#emp-type-tabs .nav-link').forEach(link => link.classList.remove('active', 'text-bim')); 
+            el.classList.add('active', 'text-bim'); 
+        }
+        currentEmpType = t; 
+        
+        let formNormal = document.getElementById('emp-form');
+        let ctContainer = document.getElementById('emp-congtac-container');
+        let guestContainer = document.getElementById('emp-guest-container');
+        
+        if (t === 'GUEST') {
+            formNormal.classList.add('d-none');
+            if(ctContainer) ctContainer.classList.add('d-none');
+            if(guestContainer) {
+                guestContainer.classList.remove('d-none');
+                document.getElementById('guest-list-input').value = '';
+            }
+        } else if (t === 'CONG_TAC') {
+            formNormal.classList.add('d-none');
+            if(guestContainer) guestContainer.classList.add('d-none');
+            if(ctContainer) {
+                ctContainer.classList.remove('d-none');
+                document.getElementById('congtac-tbody').innerHTML = ''; 
+                document.getElementById('ct-hint').innerText = 'Lưu ý: BP Cấp 2 sẽ được gán là "Công tác". Mật khẩu là SĐT.';
+                addCongTacRow(); 
+            }
+        } else {
+            if(ctContainer) ctContainer.classList.add('d-none');
+            if(guestContainer) guestContainer.classList.add('d-none');
+            formNormal.classList.remove('d-none');
+            
+            document.getElementById('mod-mnv').readOnly = false; 
+            document.getElementById('mod-mnv').value = ""; 
+            document.getElementById('mod-mnv').placeholder = "VD: BIM0123"; 
+            document.getElementById('mod-name').value = ''; 
+            document.getElementById('mod-gender').value = ''; 
+            document.getElementById('mod-phone').value = ''; 
+            document.getElementById('mod-cccd').value = ''; 
+            document.getElementById('mod-email').value = ''; 
+            document.getElementById('mod-title').value = ''; 
+            document.getElementById('mod-dv').value = ''; 
+            document.getElementById('mod-bp_goc').value = ''; 
+            document.getElementById('mod-bp1').value = ''; 
+            document.getElementById('mod-bp2').value = ''; 
+            document.getElementById('mod-bp3').value = ''; 
+            document.getElementById('mod-bp4').value = ''; 
+            document.getElementById('mod-bp5').value = ''; 
+            document.getElementById('mod-company').value = ''; 
+            document.getElementById('mod-join').value = ''; 
+            document.getElementById('mod-role').value = ''; 
+            document.getElementById('mod-leave').value = 'Đang làm việc'; 
+            document.getElementById('mod-leave-date').value = '';
+        }
     }
 
     function saveEmployee() {
         let isEdit = document.getElementById('emp-type-tabs').classList.contains('d-none'), t = currentEmpType;
-        let mnv = document.getElementById('mod-mnv').value, name = document.getElementById('mod-name').value, gender = document.getElementById('mod-gender').value, phone = document.getElementById('mod-phone').value, cccd = document.getElementById('mod-cccd').value, email = document.getElementById('mod-email').value, title = document.getElementById('mod-title').value, dv = document.getElementById('mod-dv').value, bp_goc = document.getElementById('mod-bp_goc').value, bp1 = document.getElementById('mod-bp1').value, bp2 = document.getElementById('mod-bp2').value, bp3 = document.getElementById('mod-bp3').value, bp4 = document.getElementById('mod-bp4').value, bp5 = document.getElementById('mod-bp5').value, company = document.getElementById('mod-company').value, joinDate = document.getElementById('mod-join').value, role = document.getElementById('mod-role').value, leaveStatus = document.getElementById('mod-leave').value, leaveDate = document.getElementById('mod-leave-date').value;
         
-        if(!isEdit) {
-            if(t === 'CONG_TAC') { if(!phone) return showToast("Vui lòng nhập SĐT cho Nhân viên công tác!", "danger"); cccd = phone; bp2 = "Công tác"; role = "Nhan_Vien"; } 
-            else if (t === 'GUEST') { cccd = ""; bp2 = "Khách ngoài BIM"; role = ""; }
+        if (!isEdit && t === 'GUEST') {
+            let textInput = document.getElementById('guest-list-input').value;
+            let names = textInput.split(/[\n,;|]+/).map(n => n.trim()).filter(n => n.length > 0);
+            
+            if(names.length === 0) return showToast("Vui lòng nhập tên khách!", "warning");
+            
+            let empList = [];
+            let ts = Date.now();
+            names.forEach((name, idx) => {
+                let mnv = `K_${ts}_${idx}`;
+                empList.push({
+                    mnv: mnv, name: name, gender: '', phone: '', cccd: '', email: '', title: '', dv: '', bp_goc: '', bp1: '', bp2: 'Khách ngoài BIM', bp3: '', bp4: '', bp5: '', company: '', joinDate: toDDMMYYYY(new Date()), role: '', leaveStatus: 'Đang làm việc', leaveDate: ''
+                });
+            });
+
+            empModal.hide();
+            enqueueTask({ action: 'bulk_save_employees', user: currentUser, data: empList }, "Đang thêm khách ngoài...", async (d) => { 
+                if(d.success) { 
+                    await reloadEmployeeData(); 
+                    filterEmployees(); 
+                    showToast(`Đã thêm thành công ${empList.length} khách!`, 'success'); 
+                } else { 
+                    showToast(d.message, 'danger'); 
+                } 
+            });
+            return;
         }
-        if(!mnv || !name) return showToast("Vui lòng nhập Mã NV và Họ tên", "danger");
+
+        if (!isEdit && t === 'CONG_TAC') {
+            let rows = document.querySelectorAll('#congtac-tbody tr');
+            let empList = [];
+            let hasError = false;
+            
+            rows.forEach((tr, index) => {
+                let mnv = tr.querySelector('.ct-mnv').value.trim();
+                let name = tr.querySelector('.ct-name').value.trim();
+                let phone = tr.querySelector('.ct-phone').value.trim();
+                let company = tr.querySelector('.ct-company').value.trim();
+                let bp_goc = tr.querySelector('.ct-bpgoc').value.trim();
+                
+                if (!mnv || !name || !phone) {
+                    showToast(`Vui lòng nhập đủ Mã NV, Họ tên và SĐT ở dòng ${index + 1}!`, "danger");
+                    hasError = true;
+                    return;
+                }
+                
+                empList.push({
+                    mnv: mnv, name: name, gender: '', phone: phone, cccd: phone, email: '', title: '', dv: '', bp_goc: bp_goc, bp1: '', bp2: 'Công tác', bp3: '', bp4: '', bp5: '', company: company, joinDate: toDDMMYYYY(new Date()), role: 'Nhan_Vien', leaveStatus: 'Đang làm việc', leaveDate: ''
+                });
+            });
+            
+            if (hasError) return;
+            if (empList.length === 0) return showToast("Vui lòng thêm ít nhất 1 dòng dữ liệu!", "warning");
+
+            empModal.hide();
+            enqueueTask({ action: 'bulk_save_employees', user: currentUser, data: empList }, "Đang thêm công tác...", async (d) => { 
+                if(d.success) { 
+                    await reloadEmployeeData(); 
+                    filterEmployees(); 
+                    showToast(`Đã thêm thành công ${empList.length} người!`, 'success'); 
+                } else { 
+                    showToast(d.message, 'danger'); 
+                } 
+            });
+            return;
+        }
+
+        let mnv = document.getElementById('mod-mnv').value, 
+            name = document.getElementById('mod-name').value.trim(), 
+            gender = document.getElementById('mod-gender').value, 
+            phone = document.getElementById('mod-phone').value, 
+            cccd = document.getElementById('mod-cccd').value, 
+            email = document.getElementById('mod-email').value, 
+            title = document.getElementById('mod-title').value, 
+            dv = document.getElementById('mod-dv').value, 
+            bp_goc = document.getElementById('mod-bp_goc').value, 
+            bp1 = document.getElementById('mod-bp1').value, 
+            bp2 = document.getElementById('mod-bp2').value, 
+            bp3 = document.getElementById('mod-bp3').value, 
+            bp4 = document.getElementById('mod-bp4').value, 
+            bp5 = document.getElementById('mod-bp5').value, 
+            company = document.getElementById('mod-company').value, 
+            joinDate = document.getElementById('mod-join').value, 
+            role = document.getElementById('mod-role').value, 
+            leaveStatus = document.getElementById('mod-leave').value, 
+            leaveDate = document.getElementById('mod-leave-date').value;
+        
+        if(!name || !mnv) return showToast("Vui lòng nhập Mã NV và Họ tên", "danger");
 
         empModal.hide();
-        enqueueTask({ action: 'save_employee', user: currentUser, data: { mnv, name, gender, phone, cccd, email, title, dv, bp_goc, bp1, bp2, bp3, bp4, bp5, company, joinDate, role, leaveStatus, leaveDate } }, "Đang lưu nhân sự...", async (d) => { if(d.success) { await reloadEmployeeData(); filterEmployees(); showToast(d.message, 'success'); } else { showToast(d.message, 'danger'); } });
+        enqueueTask({ action: 'save_employee', user: currentUser, data: { mnv, name, gender, phone, cccd, email, title, dv, bp_goc, bp1, bp2, bp3, bp4, bp5, company, joinDate, role, leaveStatus, leaveDate } }, "Đang lưu nhân sự...", async (d) => { 
+            if(d.success) { await reloadEmployeeData(); filterEmployees(); showToast(d.message, 'success'); } 
+            else { showToast(d.message, 'danger'); } 
+        });
     }
 
-    function toggleCheckAll(s) { document.querySelectorAll('#emp-table-body .emp-checkbox').forEach(c => { if(c.closest('tr').style.display !== 'none') c.checked = s.checked; }); }
+    function toggleCheckAll(s) { 
+        document.querySelectorAll('#emp-table-body .emp-checkbox').forEach(c => { 
+            if(c.closest('tr').style.display !== 'none') c.checked = s.checked; 
+        }); 
+    }
     
     function applyBulkRole() {
-        const role = document.getElementById('bulk-role-select').value; if(!role) return alert("Vui lòng chọn 1 quyền để cấp!");
-        let mnvList = Array.from(document.querySelectorAll('.emp-checkbox:checked')).map(c => c.value); if(mnvList.length === 0) return alert("Chọn ít nhất 1 Nhân viên bên dưới!");
-        enqueueTask({action: 'bulk_update_role', user: currentUser, newRole: role, mnvList: mnvList}, "Đang phân quyền...", async (d) => { if(d.success) { await reloadEmployeeData(); filterEmployees(); showToast('Cập nhật quyền thành công', 'success'); } });
+        const role = document.getElementById('bulk-role-select').value; 
+        if(!role) return alert("Vui lòng chọn 1 quyền để cấp!");
+        let mnvList = Array.from(document.querySelectorAll('.emp-checkbox:checked')).map(c => c.value); 
+        if(mnvList.length === 0) return alert("Chọn ít nhất 1 Nhân viên bên dưới!");
+        enqueueTask({action: 'bulk_update_role', user: currentUser, newRole: role, mnvList: mnvList}, "Đang phân quyền...", async (d) => { 
+            if(d.success) { await reloadEmployeeData(); filterEmployees(); showToast('Cập nhật quyền thành công', 'success'); } 
+        });
     }
 </script>
 </body>
