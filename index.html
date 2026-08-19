@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="BIM MEAL MANAGEMENT">
+    <meta property="og:description" content="Phần mềm đăng ký suất ăn">
+    <meta property="og:image" content="https://bmms.hama.io.vn/logo.png">
+    <title>Đăng ký Suất ăn - BIM Meal Management</title>
+    <link rel="icon" type="image/png" href="https://bmms.hama.io.vn/favicon.png?v=3"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+		/* GIỮ NGUYÊN 100% CSS NHƯ CŨ ĐỂ KHÔNG BỊ VỠ GIAO DIỆN */
+        .meal-select.val- { background-color: #fff; color: #adb5bd !important; border: 1px dashed #ced4da; }
+        :root { --bim-green: #00693c; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f6; overflow-x: hidden; height: 100vh; margin: 0; display: flex; flex-direction: column;}
+        
+        .top-nav { background: #fff; z-index: 1030; box-shadow: 0 2px 10px rgba(0,0,0,0.08); padding: 0.5rem 1rem;}
+        .navbar-brand img { height: 30px; width: auto; margin-right: 8px; }
+        .navbar-brand span { font-size: 18px; font-weight: 900; color: var(--bim-green); letter-spacing: 1px;}
+        .nav-link { color: #555; font-weight: bold; padding: 0.5rem 1rem !important; border-radius: 5px; transition: 0.2s; cursor: pointer;}
+        .nav-link:hover, .nav-link:focus { color: var(--bim-green); background: #f0fdf4; }
+        .nav-link.active { color: #fff !important; background: var(--bim-green) !important; } 
+        .dropdown-item { cursor: pointer; font-weight: bold; color: #555; padding: 0.5rem 1rem;}
+        .dropdown-item:hover { color: var(--bim-green); background: #f0fdf4; }
+        .dropdown-item.active { background: var(--bim-green) !important; color: white !important;}
+        .dropdown-menu { border: none; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-top: 5px;}
+        
+        .dropdown-submenu { position: relative; }
+        .dropdown-submenu .dropdown-menu { top: 0; left: 100%; margin-top: -1px; }
+
+        #content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; width: 100%;}
+        .content-scroll { flex: 1; overflow-y: auto; padding: 15px; position: relative;}
+        
+        .toolbar-filter { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 8px; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #ddd; margin-bottom: 15px; position: sticky; top: -15px; z-index: 1020; }
+        .filter-item { flex: 1 1 auto; min-width: 130px; max-width: 100%; }
+        
+        @media (min-width: 768px) {
+            .filter-item { flex: 0 0 auto; width: auto; }
+            .search-input { width: 180px; }
+            .select-filter { width: 160px; }
+            .date-filter { width: 250px; }
+            .tree-filter { width: 250px; }
+        }
+        
+        .table-responsive-stretch { overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 240px); width: 100%; background: #fff; border-radius: 8px; border: 1px solid #ddd; position: relative; margin-bottom: 0;}
+        .table-responsive-stretch thead th { position: sticky; top: 0; z-index: 2; background-color: #f8f9fa; }
+        
+        .dual-cell { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 120px; }
+        .dual-cell > div { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center;}
+        .dual-cell select { padding-left: 4px; padding-right: 18px; background-position: right 0.25rem center; width: 100%; text-align-last: center;}
+        .dual-cell .real-val { width: 100%; height: 29px; display: flex; align-items: center; justify-content: center; font-size: 0.95em; border-width: 1px !important;}
+        
+        .border-double-right { border-right: 3px double #00693c !important; }
+        .rep-day-header th { background-color: #00693c !important; color: white !important; font-weight: bold; text-align: center; vertical-align: middle; border: 1px solid #004d2c;}
+        .rep-day-sub th { background-color: #e6f2eb !important; color: #00693c !important; font-weight: bold; text-align: center; border: 1px solid #ccc; font-size: 0.9em;}
+        .scroll-wrapper { transition: 0.3s; }
+        .scroll-wrapper:hover .scroll-btn-left, .scroll-wrapper:hover .scroll-btn-right { opacity: 1 !important; }
+        
+        .row-sunday td { background-color: #ffe6e6 !important; }
+        .row-holiday td { background-color: #fff3cd !important; border-top: 2px solid #ffc107 !important; border-bottom: 2px solid #ffc107 !important; }
+        .row-locked td { background-color: #e9ecef !important; opacity: 0.6; pointer-events: none;}
+        .row-resigned td { background-color: #f8f9fa !important; opacity: 0.6; pointer-events: none;}
+        
+        .calendar-wrapper { width: 100%; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
+        .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 8px; text-align: center; font-weight: bold; color: #444; }
+        .calendar-header .sun { color: #d32f2f; }
+        .vcal-container { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;}
+        
+        .vcal-box { width: 100%; min-height: 95px; padding: 5px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-align: center; transition: 0.2s; background: #fff; user-select: none; display: flex; flex-direction: column; justify-content: start; align-items: center; position: relative;}
+        .vcal-box:hover:not(.locked):not(.empty) { border-color: var(--bim-green); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1);}
+        .vcal-box.locked { background: #e9ecef; opacity: 0.5; }
+        .vcal-box.empty { background: transparent; border: none; pointer-events: none; }
+        .vcal-box.sun { background: #fff0f0; color: #d32f2f; border-color: #ffcdd2;}
+        .vcal-box.selected { border: 2px solid var(--bim-green); background: #e6f2eb; box-shadow: 0 0 8px rgba(0,105,60,0.4); transform: scale(1.05); z-index: 2;}
+        
+        .vcal-box.today::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            border: 3px solid var(--bim-green);
+            border-radius: 6px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .meal-info { width: 100%; display: flex; flex-direction: column; gap: 3px; margin-top: 4px; }
+        .meal-info .badge { font-size: 0.7em; padding: 3px 2px; border-radius: 4px; width: 100%; text-align: center; border-width: 1px; border-style: solid;}
+
+        .dash-card { border: none; border-radius: 12px; transition: 0.3s; overflow: hidden; position: relative; }
+        .dash-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important; }
+        .dash-card i { position: absolute; right: -15px; bottom: -20px; font-size: 7rem; opacity: 0.15; }
+        .dash-stat { font-size: 3.5rem; font-weight: 900; line-height: 1; margin: 10px 0;}
+        
+        .inline-input { width: 100%; min-width: 80px; border: 1px solid var(--bim-green); border-radius: 4px; padding: 4px 6px; background: #f0fdf4; color: #000; font-size: 0.95em; outline: none; transition: 0.2s;}
+        .inline-input:focus { border-color: #004d2c; box-shadow: 0 0 5px rgba(0,105,60,0.5); }
+        .emp-checkbox { transform: scale(1.4); cursor: pointer; margin-top: 3px;} 
+
+        .tree-dropdown-menu { max-height: 400px; overflow-y: auto; padding: 10px; min-width: 320px; font-size: 0.9em; z-index: 9999;}
+        .tree-node { list-style: none; margin-left: 15px; padding-left: 5px; border-left: 1px dashed #ccc; margin-top: 5px;}
+        .tree-node label { cursor: pointer; width: 100%; padding: 2px 5px; border-radius: 4px; white-space: nowrap;}
+        .tree-node label:hover { background-color: #f0f0f0; }
+        .tree-root { list-style: none; margin: 0; padding: 0; }
+
+        #toast-container { position: fixed; bottom: 80px; right: 20px; z-index: 1050; }
+        .bg-bim { background-color: var(--bim-green) !important; color: white; }
+        .text-bim { color: var(--bim-green) !important; }
+        .btn-bim { background-color: var(--bim-green); color: white; border: none; }
+        .btn-bim:hover { background-color: #004d2c; color: white; }
+        
+        .drag-handle { cursor: grab; padding: 0 10px; color: #999; }
+        .drag-item { display: flex; align-items: center; padding: 8px; border: 1px solid #ddd; background: #fff; margin-bottom: 4px; border-radius: 4px; }
+        .drag-item.dragging { opacity: 0.5; border: 2px dashed var(--bim-green); }
+
+        body.role-nhanvien .ot-col select:disabled, body.role-nhanvien .ot-wrapper select:disabled { opacity: 0.6; cursor: not-allowed; }
+        #unregChart { min-height: 450px; }
+        
+        .meal-select { appearance: none; -webkit-appearance: none; -moz-appearance: none; text-align: center; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; background-image: none !important; padding-right: 0 !important; }
+        .meal-select.val-0 { background-color: #f8f9fa; color: #6c757d !important; border: 1px solid #ced4da; }
+        .meal-select.val-X { background-color: #cce5ff; color: #0d6efd !important; border: 1px solid #b6d4fe; }
+        .meal-select.val-Y { background-color: #f8d7da; color: #dc3545 !important; border: 1px solid #f5c2c7; }
+
+        .ms-bf, .ms-lu, .ms-di, .ms-ot { min-width: 50px !important; padding: 4px !important; }
+        .meal-note { min-width: 150px !important; max-height: 80px; }
+        
+        @keyframes ring { 0% { transform: rotate(0); } 10% { transform: rotate(15deg); } 20% { transform: rotate(-10deg); } 30% { transform: rotate(5deg); } 40% { transform: rotate(-5deg); } 50% { transform: rotate(0); } }
+        .ringing { animation: ring 1s ease-in-out infinite; color: red !important; }
+        
+        .cropper-view-box, .cropper-face { border-radius: 50%; }
+        
+        .profile-card { background: linear-gradient(135deg, #f0fdf4 0%, #e6f2eb 100%); border-radius: 15px; border: none; }
+        .profile-avatar-container { position: relative; display: inline-block; padding: 5px; background: white; border-radius: 50%; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-top: -60px; }
+        .profile-avatar { width: 140px; height: 140px; object-fit: cover; border-radius: 50%; border: 3px solid var(--bim-green); }
+        .btn-cam { position: absolute; bottom: 5px; right: 5px; background: var(--bim-green); color: white; border: 2px solid white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;}
+        .btn-cam:hover { transform: scale(1.1); }
+        
+        .pagination-container { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 10px; background: #fff; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px; font-size: 0.9em; }
+        .pagination-container select, .pagination-container input { border: 1px solid #ced4da; border-radius: 4px; padding: 3px 6px; outline: none; }
+        .pagination-container input { width: 50px; text-align: center; }
+        .pagination-container button { background: #f8f9fa; border: 1px solid #ced4da; border-radius: 4px; padding: 3px 8px; cursor: pointer; color: #333; }
+        .pagination-container button:hover:not(:disabled) { background: #e2e6ea; }
+        .pagination-container button:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+<div id="initial-loader" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#f4f7f6; z-index:9999; display:flex; align-items:center; justify-content:center;">
+    <div class="text-center">
+        <img src="https://lh3.googleusercontent.com/d/18DgW1i6MtUKwa1pfHG92FxBZ6J_yA1MW" alt="Logo" style="height: 60px; margin-bottom: 20px;">
+        <br><i class="fa-solid fa-spinner fa-spin fs-2 text-bim"></i>
+    </div>
+</div>
+
+<datalist id="list-gender"><option value="Nam"><option value="Nữ"></datalist>
+<datalist id="list-title"></datalist>
+<datalist id="list-dept"></datalist>
+<datalist id="list-bpgoc"></datalist>
+<datalist id="list-company"></datalist>
+<datalist id="list-dv"></datalist>
+
+<!-- LOGIN VIEW -->
+<div id="view-login" class="container mt-5 pt-5 d-none">
+    <div class="card shadow-lg mx-auto border-0" style="max-width: 450px; border-radius: 12px; overflow: hidden;">
+        <div class="card-body p-4" id="view-login-form">
+            <div class="d-flex align-items-center justify-content-center mb-4 gap-2 text-nowrap">
+                <img src="https://lh3.googleusercontent.com/d/18DgW1i6MtUKwa1pfHG92FxBZ6J_yA1MW" alt="Logo" style="height: 30px;">
+                <h5 class="fw-bold text-bim m-0 lh-1" style="font-size: 1.15rem;">BIM MEAL MANAGEMENT</h5>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold text-muted small">MÃ NHÂN VIÊN</label>
+                <input type="text" id="login-mnv" class="form-control form-control-lg" placeholder="BIM0123">
+            </div>			
+            <div class="mb-3">
+                <label class="form-label fw-bold text-muted small">MẬT KHẨU</label>
+                <input type="password" id="login-pass" class="form-control form-control-lg" placeholder="Nhập mật khẩu">
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check"><input class="form-check-input border-secondary" type="checkbox" id="remember-me" checked><label class="form-check-label fw-bold text-muted small" for="remember-me">Ghi nhớ đăng nhập</label></div>
+                <a href="#" class="text-decoration-none small fw-bold text-bim" onclick="toggleForgotPass(true)">Quên mật khẩu?</a>
+            </div>
+            <button class="btn btn-bim w-100 fw-bold btn-lg d-flex justify-content-center align-items-center gap-2" id="btn-login" onclick="handleLogin()"><span>Đăng Nhập</span> <i id="login-spinner" class="fa-solid fa-spinner fa-spin d-none"></i></button>
+            <div id="login-error" class="text-danger mt-3 text-center fw-bold small"></div>
+        </div>
+        
+        <div class="card-body p-4 d-none bg-light" id="view-forgot-form">
+            <div class="text-center mb-4"><h5 class="fw-bold text-bim m-0 lh-1"><i class="fa-solid fa-unlock-keyhole"></i> ĐẶT LẠI MẬT KHẨU</h5><p class="small text-muted mt-2">Nhập đúng thông tin để đặt lại MK mới</p></div>
+            <div class="mb-3"><label class="form-label fw-bold text-muted small">MÃ NHÂN VIÊN (*)</label><input type="text" id="fg-mnv" class="form-control border-primary" placeholder="BIM0123"></div>
+            <div class="mb-3"><label class="form-label fw-bold text-muted small">SỐ ĐIỆN THOẠI (*)</label><input type="text" id="fg-phone" class="form-control border-primary" placeholder="09xxxx"></div>
+            <div class="mb-3"><label class="form-label fw-bold text-muted small">SỐ CCCD (*)</label><input type="text" id="fg-cccd" class="form-control border-primary" placeholder="07xxxx"></div>
+            <hr>
+            <div class="mb-3"><label class="form-label fw-bold text-bim small">MẬT KHẨU MỚI</label><input type="password" id="fg-new" class="form-control border-success"></div>
+            <div class="mb-4"><label class="form-label fw-bold text-bim small">NHẬP LẠI MK MỚI</label><input type="password" id="fg-confirm" class="form-control border-success"></div>
+            <div class="d-flex gap-2"><button class="btn btn-outline-secondary w-50 fw-bold" onclick="toggleForgotPass(false)">QUAY LẠI</button><button class="btn btn-bim w-50 fw-bold" id="btn-forgot" onclick="handleResetPassword()">XÁC NHẬN</button></div>
+        </div>
+    </div>
+</div>
+
+<!-- APP -->
+<div id="app-wrapper" class="d-none h-100 d-flex flex-column">
+    <nav class="navbar navbar-expand-lg top-nav w-100">
+        <div class="container-fluid p-0 d-flex align-items-center">
+            <a class="navbar-brand d-flex align-items-center m-0" href="#">
+                <img src="https://lh3.googleusercontent.com/d/18DgW1i6MtUKwa1pfHG92FxBZ6J_yA1MW" alt="Logo"><span>BIM MEAL MANAGEMENT</span>
+            </a>
+            <button class="navbar-toggler ms-auto border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#topNavMenu"><span class="navbar-toggler-icon"></span></button>
+
+            <div class="collapse navbar-collapse mt-2 mt-lg-0" id="topNavMenu">
+                <ul class="navbar-nav me-auto ms-lg-4 mb-2 mb-lg-0" id="nav-menus"></ul>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 ms-auto mt-2 mt-lg-0">
+                <div class="text-end border-end pe-2" id="header-countdown" style="min-width: 100px;"></div>
+                
+                <div class="mx-1 position-relative">
+                    <button class="btn btn-outline-success btn-sm rounded-circle position-relative" onclick="manualSyncNow()" title="Đồng bộ dữ liệu" style="width: 35px; height: 35px;">
+                        <i id="manual-sync-icon" class="fa-solid fa-rotate"></i>
+                        <span id="manual-sync-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6em; display: none;">0</span>
+                    </button>
+                </div>
+
+                <div class="dropdown mx-1 position-relative">
+                    <button class="btn btn-outline-secondary btn-sm rounded-circle position-relative" data-bs-toggle="dropdown" onclick="markRead()" title="Thông báo" style="width: 35px; height: 35px;">
+                        <i id="bell-icon" class="fa-solid fa-bell"></i><span id="notif-badge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm p-2" id="notif-list" style="width: 320px; max-height: 400px; overflow-y: auto;"><li class="text-center text-muted small py-2">Không có thông báo mới</li></ul>
+                </div>
+                <div class="dropdown ms-1">
+                    <div class="d-flex flex-row align-items-center border-start ps-2 dropdown-toggle user-select-none" data-bs-toggle="dropdown" style="cursor: pointer;">
+                        <div class="d-flex flex-column text-end lh-1 me-2">
+                            <span class="fw-bold text-bim mb-1 d-none" id="top-user-name" style="font-size: 0.9rem;">...</span>
+                            <span class="small text-muted d-none" id="top-user-role" style="font-size: 0.75em;">...</span>
+                        </div>
+                        <img id="top-user-avatar" src="" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; display: none;" referrerpolicy="no-referrer">
+                        <i id="top-user-icon" class="fa-solid fa-circle-user fs-2 text-secondary"></i>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm mt-2 border-0">
+                        <li><a class="dropdown-item fw-bold text-secondary py-2" href="#" onclick="openAccountInfoModal()"><i class="fa-solid fa-id-card text-bim me-1"></i> Thông tin</a></li>
+                        <li><a class="dropdown-item fw-bold text-secondary py-2" href="#" onclick="openChangePassModal()"><i class="fa-solid fa-key text-bim me-1"></i> Đổi mật khẩu</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item fw-bold text-danger py-2" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-1"></i> Đăng xuất</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="content">
+        <div class="content-scroll" id="main-scroll">
+            
+            <!-- VIEW DUY NHẤT ĐƯỢC GIỮ LẠI TRONG INDEX.HTML LÀ ĐĂNG KÝ -->
+            <div id="view-register" class="page-view">
+                <div class="tab-content bg-white border rounded p-2 p-md-3 shadow-sm">
+                    <div class="tab-pane fade show active" id="reg-personal">
+                        <div class="tab-content">
+                            <!-- CHẾ ĐỘ LỊCH -->
+                            <div class="tab-pane fade show active" id="mode-vcal">
+								<div class="d-flex align-items-center gap-3 mb-3 bg-light p-2 rounded border shadow-sm w-100 justify-content-center position-relative flex-wrap">
+									<button class="btn btn-outline-secondary fw-bold bg-white btn-sm" onclick="changeRegCycle(-1)"><i class="fa-solid fa-chevron-left"></i> TRƯỚC</button>
+									<h5 class="m-0 fw-bold text-bim px-2 px-md-4 fs-6 fs-md-5" id="vcal-cycle-title">Kỳ: ...</h5>
+									<button class="btn btn-outline-secondary fw-bold bg-white btn-sm" onclick="changeRegCycle(1)">TỚI <i class="fa-solid fa-chevron-right"></i></button>
+										<div class="position-absolute end-0 me-2 d-flex">
+											<button class="btn fw-bold shadow-sm btn-sm px-2 text-nowrap" style="background-color: #ff9800; border: 2px solid #e68a00; color: white;" onclick="openMealCostModal()" title="Chi tiết tiền ăn">
+												<i class="fa-solid fa-file-invoice-dollar text-white"></i>
+											</button>
+										</div>
+								</div>
+                                <div class="row g-3 align-items-stretch flex-column flex-lg-row">
+                                    <div class="col-lg-8 order-1">
+                                        <div class="calendar-wrapper h-100 mb-0">
+                                            <div class="calendar-header"><div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div><div>T7</div><div class="sun">CN</div></div>
+                                            <div class="vcal-container" id="vcal-grid"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 order-2 mt-3 mt-lg-0">
+                                        <div class="card border-0 shadow bg-light h-100 sticky-lg-top" style="top: 10px; z-index: 10;">
+                                            <div class="card-body d-flex flex-column p-3 p-md-4">
+                                                <h6 class="fw-bold mb-3 border-bottom pb-2 text-bim"><i class="fa-solid fa-pen-to-square"></i> Chọn suất ăn (Tô xanh):</h6>
+                                                <div class="row g-3 mb-3">
+                                                    <div class="col-6"><label class="fw-bold text-primary small">Sáng</label><select class="form-select border-secondary fw-bold" id="vc-bf"><option value="0">-Không-</option><option value="X">Bãi Trường</option><option value="Y">Hyatt</option></select></div>
+                                                    <div class="col-6"><label class="fw-bold text-success small">Trưa</label><select class="form-select border-secondary fw-bold" id="vc-lu"><option value="0">-Không-</option><option value="X">Bãi Trường</option><option value="Y">Hyatt</option></select></div>
+                                                    <div class="col-6"><label class="fw-bold text-purple small" style="color: #6f42c1;">Chiều</label><select class="form-select border-secondary fw-bold" id="vc-di"><option value="0">-Không-</option><option value="X">Bãi Trường</option><option value="Y">Hyatt</option></select></div>
+                                                    <div class="col-6 ot-wrapper"><label class="fw-bold text-danger small">Tăng ca</label><select class="form-select border-secondary fw-bold ot-select" id="vc-ot"><option value="0">-Không-</option><option value="X">Bãi Trường</option><option value="Y">Hyatt</option></select></div>
+                                                    <div class="col-12"><label class="fw-bold small">Ghi chú</label><input type="text" class="form-control border-secondary" id="vc-note"></div>
+                                                </div>
+                                                <div class="mt-auto pt-3">
+                                                    <div class="row g-2">
+                                                        <div class="col-6"><button class="btn btn-outline-danger w-100 fw-bold shadow-sm py-2" onclick="clearVcalRegistration()"><i class="fa-solid fa-trash me-1"></i>XÓA CHỌN</button></div>
+                                                        <div class="col-6"><button class="btn btn-bim w-100 fw-bold shadow-sm py-2" onclick="submitVcalRegistration()"><i class="fa-solid fa-save me-1"></i>LƯU LẠI</button></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- CHẾ ĐỘ LƯỚI -->
+                            <div class="tab-pane fade" id="mode-cycle">
+                                <div class="toolbar-filter mb-3">
+                                    <select id="mc-filter-type" class="form-select form-select-sm border-secondary fw-bold filter-item select-filter" onchange="changeFilterType('mc')">
+                                        <option value="cycle">Kỳ lương</option>
+                                        <option value="today">Hôm nay</option>
+                                        <option value="custom">Khoảng thời gian</option>
+                                    </select>
+                                    <div class="d-flex align-items-center flex-nowrap filter-item date-filter">
+                                        <button class="btn btn-sm btn-outline-secondary rounded-end-0 border-secondary px-2" onclick="changeDateStep('mc', -1)"><i class="fa-solid fa-chevron-left"></i></button>
+                                        <input type="text" id="mc-date" class="form-control form-control-sm border-secondary fw-bold text-center rounded-0 flatpickr-date flatpickr-input flex-grow-1" placeholder="dd/mm/yyyy">
+                                        <button class="btn btn-sm btn-outline-secondary rounded-start-0 border-secondary px-2" onclick="changeDateStep('mc', 1)"><i class="fa-solid fa-chevron-right"></i></button>
+                                    </div>
+                                    
+								<div class="ms-auto d-flex gap-2 flex-wrap">
+									<button class="btn fw-bold shadow-sm btn-sm px-2 text-nowrap" style="background-color: #ff9800; border: 2px solid #e68a00; color: white;" onclick="openMealCostModal()" title="Chi tiết tiền ăn">
+										<i class="fa-solid fa-file-invoice-dollar text-white"></i>
+									</button>
+									<button class="btn btn-bim fw-bold shadow-sm btn-sm px-2 text-nowrap" onclick="submitGridRegistration()" title="Lưu Đăng ký">
+										<i class="fa-solid fa-save"></i>
+									</button>
+								</div>
+                                </div>
+
+                                <div class="row text-center mb-3 g-3">
+                                    <div class="col-6 col-md-3"><div class="card dash-card text-white p-2 p-md-3 shadow-sm h-100" style="background-color: #0d6efd;"><i class="fa-solid fa-mug-saucer"></i><h6 class="fw-bold text-uppercase opacity-75 m-0" style="letter-spacing:1px;">TỔNG SÁNG</h6><div class="dash-stat" id="mc-sang">0</div><div class="dash-sub d-flex gap-2 justify-content-center"><span class="badge bg-white text-primary px-2 py-1 fs-6 shadow-sm">BT: <span id="mc-sang-bt" class="fs-5">0</span></span><span class="badge bg-white text-danger px-2 py-1 fs-6 shadow-sm">HY: <span id="mc-sang-hy" class="fs-5">0</span></span></div></div></div>
+                                    <div class="col-6 col-md-3"><div class="card dash-card text-white p-2 p-md-3 shadow-sm h-100" style="background-color: #198754;"><i class="fa-solid fa-bowl-rice"></i><h6 class="fw-bold text-uppercase opacity-75 m-0" style="letter-spacing:1px;">TỔNG TRƯA</h6><div class="dash-stat" id="mc-trua">0</div><div class="dash-sub d-flex gap-2 justify-content-center"><span class="badge bg-white text-primary px-2 py-1 fs-6 shadow-sm">BT: <span id="mc-trua-bt" class="fs-5">0</span></span><span class="badge bg-white text-danger px-2 py-1 fs-6 shadow-sm">HY: <span id="mc-trua-hy" class="fs-5">0</span></span></div></div></div>
+                                    <div class="col-6 col-md-3"><div class="card dash-card text-white p-2 p-md-3 shadow-sm h-100" style="background-color: #6f42c1;"><i class="fa-solid fa-burger"></i><h6 class="fw-bold text-uppercase opacity-75 m-0" style="letter-spacing:1px;">TỔNG CHIỀU</h6><div class="dash-stat" id="mc-toi">0</div><div class="dash-sub d-flex gap-2 justify-content-center"><span class="badge bg-white text-primary px-2 py-1 fs-6 shadow-sm">BT: <span id="mc-toi-bt" class="fs-5">0</span></span><span class="badge bg-white text-danger px-2 py-1 fs-6 shadow-sm">HY: <span id="mc-toi-hy" class="fs-5">0</span></span></div></div></div>
+                                    <div class="col-6 col-md-3 ot-col"><div class="card dash-card text-white p-2 p-md-3 shadow-sm h-100" style="background-color: #dc3545;"><i class="fa-solid fa-hotdog"></i><h6 class="fw-bold text-uppercase opacity-75 m-0" style="letter-spacing:1px;">TỔNG TĂNG CA</h6><div class="dash-stat" id="mc-ot">0</div><div class="dash-sub d-flex gap-2 justify-content-center"><span class="badge bg-white text-primary px-2 py-1 fs-6 shadow-sm">BT: <span id="mc-ot-bt" class="fs-5">0</span></span><span class="badge bg-white text-danger px-2 py-1 fs-6 shadow-sm">HY: <span id="mc-ot-hy" class="fs-5">0</span></span></div></div></div>
+                                </div>
+
+                                <div class="table-responsive-stretch mb-0">
+                                    <table class="table table-bordered table-hover mb-0 align-middle text-center text-nowrap">
+                                        <thead class="table-light position-sticky top-0 z-1 shadow-sm" id="reg-grid-thead">
+                                            <tr>
+                                                <th style="width:100px;">Ngày</th><th style="width:60px;">Thứ/Lễ</th>
+                                                <th style="min-width: 60px;">Sáng (Không, Bãi Trường, Hyatt)</th>
+                                                <th style="min-width: 60px;">Trưa (Không, Bãi Trường, Hyatt)</th>
+                                                <th style="min-width: 60px;">Chiều (Không, Bãi Trường, Hyatt)</th>
+                                                <th class="ot-col" style="min-width: 70px;">Tăng Ca (Không, Bãi Trường, Hyatt)</th>
+                                                <th class="text-start" style="min-width: 150px;">Ghi chú</th><th style="width:50px;">Xóa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="reg-grid-body"></tbody>
+                                    </table>
+                                </div>
+                                <div id="pagination-mc" class="pagination-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB ĐĂNG KÝ HỘ -->
+                    <div class="tab-pane fade" id="reg-others">
+                        <div class="toolbar-filter">
+                            <input type="text" id="ro-search" class="form-control form-control-sm border-primary filter-item search-input" placeholder="Tìm tên, mã NV..." onkeyup="debounceSearch(renderRegOthersGrid, 300)">
+                            <select id="ro-filter-type" class="form-select form-select-sm border-secondary fw-bold filter-item select-filter" onchange="changeFilterType('ro')"><option value="today">Hôm nay</option><option value="cycle">Kỳ lương</option><option value="custom">Khoảng thời gian</option></select>
+                            <div class="d-flex align-items-center flex-nowrap filter-item date-filter">
+                                <button class="btn btn-sm btn-outline-secondary rounded-end-0 border-secondary px-2" onclick="changeDateStep('ro', -1)"><i class="fa-solid fa-chevron-left"></i></button>
+                                <input type="text" id="ro-date" class="form-control form-control-sm border-secondary fw-bold text-center rounded-0 flatpickr-date flatpickr-input flex-grow-1" placeholder="dd/mm/yyyy">
+                                <button class="btn btn-sm btn-outline-secondary rounded-start-0 border-secondary px-2" onclick="changeDateStep('ro', 1)"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                            <div class="dropdown filter-item tree-filter">
+                                <button class="btn btn-outline-secondary dropdown-toggle btn-sm bg-white text-dark border-secondary w-100 text-start text-truncate" type="button" data-bs-toggle="dropdown">Cây Bộ Phận</button>
+                                <ul class="dropdown-menu tree-dropdown-menu shadow w-150" id="ro-dept-tree" onclick="event.stopPropagation()"></ul>
+                            </div>
+                            <div class="dropdown filter-item">
+                                <button class="btn btn-outline-secondary dropdown-toggle btn-sm bg-white text-dark border-secondary w-100 text-start text-truncate" type="button" data-bs-toggle="dropdown">BP chấm công</button>
+                                <ul class="dropdown-menu shadow p-2" id="filter-bpgoc-ro" onclick="event.stopPropagation()" style="min-width: 280px; max-height: 300px; overflow-y: auto;"></ul>
+                            </div>
+                            <div class="dropdown filter-item">
+                                <button class="btn btn-outline-secondary dropdown-toggle btn-sm bg-white text-dark border-secondary w-100 text-start" type="button" data-bs-toggle="dropdown">Tình trạng</button>
+                                <ul class="dropdown-menu shadow p-2" id="filter-status-ro" onclick="event.stopPropagation()">
+                                    <li><label class="form-check-label w-100"><input type="checkbox" class="form-check-input status-cb me-2" value="Đang làm việc" checked onchange="renderRegOthersGrid()"> Đang làm việc</label></li>
+                                    <li><label class="form-check-label w-100"><input type="checkbox" class="form-check-input status-cb me-2" value="Đã nghỉ" onchange="renderRegOthersGrid()"> Đã nghỉ</label></li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm fw-bold filter-item" onclick="openColSettings('ro')" style="max-width: max-content;"><i class="fa-solid fa-table-columns"></i> Cột</button>
+                            
+							<div class="ms-auto d-flex gap-1 align-items-center flex-wrap filter-item justify-content-md-end">
+                                <button class="btn btn-outline-success fw-bold shadow-sm btn-sm px-2 text-nowrap" onclick="downloadExcelTemplate('ro')"><i class="fa-solid fa-download"></i> MẪU</button>
+                                <button class="btn btn-outline-primary fw-bold shadow-sm btn-sm px-2 text-nowrap" onclick="document.getElementById('excel-upload-input').click()"><i class="fa-solid fa-upload"></i> UPLOAD</button>
+                                <button class="btn btn-outline-warning fw-bold shadow-sm btn-sm px-2 text-nowrap" onclick="openCopyDateModal()"><i class="fa-solid fa-copy"></i> COPY</button>
+                                <button class="btn btn-bim fw-bold shadow-sm btn-sm px-3 text-nowrap" onclick="submitRegOthersGrid()"><i class="fa-solid fa-save"></i> LƯU</button>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mb-2 justify-content-center justify-content-md-start">
+                            <span class="badge border border-secondary text-secondary bg-light shadow-sm fs-6 px-3">O: Không</span>
+                            <span class="badge border border-primary text-primary bg-primary bg-opacity-10 shadow-sm fs-6 px-3">X: Bãi Trường</span>
+                            <span class="badge border border-danger text-danger bg-danger bg-opacity-10 shadow-sm fs-6 px-3">Y: Hyatt</span>
+                        </div>
+                        <div class="table-responsive-stretch mt-2 mb-0">
+                            <table class="table table-bordered table-hover mb-0 align-middle text-center text-nowrap" id="table-ro">
+                                <thead class="table-light position-sticky top-0 z-1 shadow-sm"><tr id="ro-thead"></tr></thead>
+                                <tbody id="ro-grid-body"></tbody>
+                            </table>
+                        </div>
+                        <div id="pagination-ro" class="pagination-container"></div>
+                    </div>
+
+                    <!-- TAB CHƯA ĐĂNG KÝ -->
+                    <div class="tab-pane fade" id="reg-unregistered">
+                        <div class="toolbar-filter">
+                            <input type="text" id="unreg-search" class="form-control form-control-sm border-primary filter-item search-input" placeholder="Tìm tên, mã NV..." onkeyup="debounceSearch(renderUnregistered, 300)">
+                            <select id="unreg-filter-type" class="form-select form-select-sm border-secondary fw-bold filter-item select-filter" onchange="changeFilterType('unreg')"><option value="today">Hôm nay</option><option value="cycle">Kỳ lương</option><option value="custom">Khoảng thời gian</option></select>
+                            <div class="d-flex align-items-center flex-nowrap filter-item date-filter">
+                                <button class="btn btn-sm btn-outline-secondary rounded-end-0 border-secondary px-2" onclick="changeDateStep('unreg', -1)"><i class="fa-solid fa-chevron-left"></i></button>
+                                <input type="text" id="unreg-date" class="form-control form-control-sm border-secondary fw-bold text-center rounded-0 flatpickr-date flatpickr-input flex-grow-1" placeholder="dd/mm/yyyy">
+                                <button class="btn btn-sm btn-outline-secondary rounded-start-0 border-secondary px-2" onclick="changeDateStep('unreg', 1)"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                            <div class="dropdown filter-item tree-filter">
+                                <button class="btn btn-outline-secondary dropdown-toggle btn-sm bg-white text-dark border-secondary w-100 text-start text-truncate" type="button" data-bs-toggle="dropdown">Cây Bộ Phận</button>
+                                <ul class="dropdown-menu tree-dropdown-menu shadow w-150" id="unreg-dept-tree" onclick="event.stopPropagation()"></ul>
+                            </div>
+                            <div class="dropdown filter-item">
+                                <button class="btn btn-outline-secondary dropdown-toggle btn-sm bg-white text-dark border-secondary w-100 text-start text-truncate" type="button" data-bs-toggle="dropdown">BP chấm công</button>
+                                <ul class="dropdown-menu shadow p-2" id="filter-bpgoc-unreg" onclick="event.stopPropagation()" style="min-width: 280px; max-height: 300px; overflow-y: auto;"></ul>
+                            </div>
+                            <div class="dropdown filter-item">
+                                <button class="btn btn-outline-secondary dropdown-toggle btn-sm bg-white text-dark border-secondary w-100 text-start" type="button" data-bs-toggle="dropdown">Tình trạng</button>					
+                                <ul class="dropdown-menu shadow p-2" id="filter-status-unreg" onclick="event.stopPropagation()">
+                                    <li><label class="form-check-label w-100"><input type="checkbox" class="form-check-input status-cb me-2" value="Đang làm việc" checked onchange="renderUnregistered()"> Đang làm việc</label></li>
+                                    <li><label class="form-check-label w-100"><input type="checkbox" class="form-check-input status-cb me-2" value="Đã nghỉ" onchange="renderUnregistered()"> Đã nghỉ</label></li>
+                                </ul>
+                            </div>
+							<select id="unreg-group-by" class="form-select form-select-sm border-secondary fw-bold filter-item text-dark" onchange="renderUnregistered()" style="width: auto;">
+                                <option value="bp_goc">BP Chấm công</option>
+                                <option value="dv">Đơn vị</option>
+                                <option value="bp1">BP Cấp 1</option>
+                                <option value="dept_cap2" selected>BP Cấp 2</option>
+                                <option value="bp3">BP Cấp 3</option>
+                                <option value="bp4">BP Cấp 4</option>
+                                <option value="bp5">BP Cấp 5</option>
+                            </select>							
+                        </div>
+                        <div class="card shadow-sm mb-3 border-0 bg-white rounded">
+                            <div class="card-body">
+                                <div style="height: 65vh; width: 100%;"><canvas id="unregChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- CÁC MODALS GIỮ LẠI CHO TRANG ĐĂNG KÝ -->
+<!-- Modal Copy Ngày -->
+<div class="modal fade" id="copyDateModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success text-white">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa-copy"></i> Copy sang ngày khác</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <label class="fw-bold small mb-2 text-primary">Chọn ngày đích để dán:</label>
+                <input type="text" id="copy-target-date" class="form-control border-primary text-center fw-bold flatpickr-date" placeholder="dd/mm/yyyy">
+                <p class="small text-muted mt-2 mb-0">Hệ thống sẽ copy <b>TOÀN BỘ</b> lựa chọn suất ăn của danh sách hiện tại sang ngày đích.</p>
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success btn-sm fw-bold shadow-sm" onclick="submitCopyDate()"><i class="fa-solid fa-check"></i> XÁC NHẬN COPY</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thông tin Tài khoản -->
+<div class="modal fade" id="accountInfoModal" tabindex="-1">
+    <div class="modal-dialog mt-5 pt-3">
+        <div class="modal-content profile-card shadow-lg mt-4">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 pt-0 text-center">
+                <div class="profile-avatar-container shadow-sm mb-3">
+                    <img id="acc-avatar" class="profile-avatar" src="" style="display: none;" referrerpolicy="no-referrer">
+                    <i id="acc-avatar-icon" class="fa-solid fa-circle-user text-secondary" style="font-size: 140px; display: inline-block;"></i>
+                    <div class="btn-cam" onclick="document.getElementById('avatar-upload').click()"><i class="fa-solid fa-camera"></i></div>
+                    <input type="file" id="avatar-upload" accept="image/*" class="d-none" onchange="handleAvatarSelect(event)">
+                </div>
+                <h4 class="fw-bold text-dark mb-0" id="acc-name">Họ và Tên</h4>
+                <p class="text-muted small fw-bold mb-3" id="acc-title-role">Chức danh / Quyền</p>
+                
+                <div class="text-start bg-white p-3 rounded shadow-sm small">
+                    <div class="mb-2"><i class="fa-solid fa-id-badge text-bim me-2"></i><span class="text-muted">Mã NV:</span> <span class="fw-bold float-end" id="acc-mnv">-</span></div>
+                    <div class="mb-2"><i class="fa-solid fa-phone text-bim me-2"></i><span class="text-muted">SĐT:</span> <span class="fw-bold float-end" id="acc-phone">-</span></div>
+                    <div class="mb-2"><i class="fa-solid fa-envelope text-bim me-2"></i><span class="text-muted">Email:</span> <span class="fw-bold float-end" id="acc-email">-</span></div>
+                    <div class="mb-2"><i class="fa-solid fa-building text-bim me-2"></i><span class="text-muted">Công ty:</span> <span class="fw-bold float-end" id="acc-company">-</span></div>
+                    <hr class="my-2">
+                    <div class="mb-1"><i class="fa-solid fa-sitemap text-bim me-2"></i><span class="text-muted">Đơn vị công tác:</span><br><span class="fw-bold text-dark" id="acc-dept">-</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cắt Ảnh Đại Diện Hình Tròn -->
+<div class="modal fade" id="cropAvatarModal" tabindex="-1" style="z-index: 1070;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-bim text-white"><h5 class="modal-title fw-bold">Cắt Ảnh Đại Diện</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body text-center p-3 bg-light">
+                <div style="max-height: 400px; width: 100%;"><img id="crop-image" src="" style="max-width: 100%;"></div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-bim" onclick="saveCroppedAvatar()"><i class="fa-solid fa-save"></i> Lưu Ảnh</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Đổi Mật Khẩu -->
+<div class="modal fade" id="changePassModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-bim text-white"><h5 class="modal-title fw-bold"><i class="fa-solid fa-key"></i> Đổi Mật Khẩu</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body p-3">
+                <div class="mb-3"><label class="fw-bold small text-muted">Mật khẩu cũ</label><input type="password" class="form-control border-secondary" id="cp-old"></div>
+                <div class="mb-3"><label class="fw-bold small text-bim">Mật khẩu mới</label><input type="password" class="form-control border-success" id="cp-new"></div>
+                <div class="mb-4"><label class="fw-bold small text-bim">Xác nhận MK mới</label><input type="password" class="form-control border-success" id="cp-confirm"></div>
+                <button class="btn btn-bim w-100 fw-bold shadow" onclick="submitChangePassword()">XÁC NHẬN ĐỔI</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Đăng Ký Đơn Lẻ -->
+<div class="modal fade" id="singleDateModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-bim text-white"><h5 class="modal-title fw-bold" id="singleDateTitle">Đăng ký</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body p-3">
+        <input type="hidden" id="sd-date">
+        <div class="mb-2"><label class="fw-bold text-primary small">Sáng</label><select class="form-select form-select-sm fw-bold" id="sd-bf"><option value="0">-Không-</option><option value="X">Bãi Trường</option><option value="Y">Hyatt</option></select></div>
+        <div class="mb-2"><label class="fw-bold text-success small">Trưa</label><select class="form-select form-select-sm fw-bold" id="sd-lu"><option value="0">-Không-</option><option value="X">Bãi Trường</option><option value="Y">Hyatt</option></select></div>
+        <div class="mb-2"><label class="fw-bold text-purple small" style="color: #6f42c1;">Chiều</label><select class="form-select form-select-sm fw-bold" id="sd-di"><option value="0">-Không-</option><option value="X">Bãi Trường</option><option value="Y">Hyatt</option></select></div>
+        <div class="mb-2 ot-wrapper"><label class="fw-bold text-danger small">Tăng ca</label><select class="form-select form-select-sm fw-bold ot-select" id="sd-ot"><option value="0">-Không-</option><option value="X">Bãi Trường</option><option value="Y">Hyatt</option></select></div>
+        <div class="mb-3"><label class="fw-bold small">Ghi chú</label><input type="text" class="form-control form-control-sm border-secondary" id="sd-note"></div>
+        <div class="row g-2 mt-2">
+            <div class="col-6"><button class="btn btn-outline-danger w-100 fw-bold shadow" onclick="clearSingleDate()"><i class="fa-solid fa-trash"></i> Xóa</button></div>
+            <div class="col-6"><button class="btn btn-bim w-100 fw-bold shadow" onclick="submitSingleDate()"><i class="fa-solid fa-save"></i> Lưu</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Chi tiết Chưa đăng ký -->
+<div class="modal fade" id="unregDetailsModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-bim text-white">
+          <h5 class="modal-title fw-bold" id="unregDetailsTitle">Chi tiết đăng ký</h5>
+          <div><button class="btn btn-success btn-sm fw-bold shadow-sm me-2" onclick="exportUnregDetailsExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+      </div>
+      <div class="modal-body p-3">
+        <h5 id="modal-summary-text" class="text-center fw-bold text-secondary mb-3 border-bottom pb-2">Tổng: 0 | Đã ĐK: 0 | Chưa ĐK: 0</h5>
+        <div class="table-responsive" style="max-height: 65vh; overflow-y: auto;">
+            <table class="table table-bordered table-hover text-center align-middle text-nowrap">
+                <thead class="table-light position-sticky top-0 z-1 shadow-sm">
+                    <tr><th>Mã NV</th><th class="text-start">Họ Tên</th><th>Sáng</th><th>Trưa</th><th>Chiều</th><th class="ot-col">Tăng ca</th><th class="text-start">Ghi chú</th></tr>
+                </thead>
+                <tbody id="modal-detail-tbody"></tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Tùy Chỉnh Cột -->
+<div class="modal fade" id="colSettingsModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-bim text-white"><h6 class="modal-title fw-bold">Tùy chỉnh Cột hiển thị</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body p-2">
+                <p class="small text-muted mb-2"><i class="fa-solid fa-arrows-up-down"></i> Kéo thả để sắp xếp, check để hiển thị.</p>
+                <ul id="col-sortable-list" class="list-group list-group-flush mb-0" style="max-height: 50vh; overflow-y: auto;"></ul>
+            </div>
+            <div class="modal-footer p-2"><button type="button" class="btn btn-bim btn-sm w-100 fw-bold shadow-sm" onclick="saveColConfig()"><i class="fa-solid fa-save"></i> LƯU VÀ ÁP DỤNG</button></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chi tiết tiền ăn -->
+<div class="modal fade" id="mealCostModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header text-white" style="background-color: var(--bim-green);">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-invoice-dollar"></i> Chi tiết tiền ăn cá nhân</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover text-center align-middle">
+                        <thead class="table-light shadow-sm text-bim">
+                            <tr><th>Suất ăn</th><th>Số suất</th><th>Đơn giá (VNĐ)</th><th>Thành tiền (VNĐ)</th></tr>
+                        </thead>
+                        <tbody id="mealCostTableBody"></tbody>
+                        <tfoot class="table-light fw-bold">
+                            <tr><td colspan="3" class="text-end">Tổng cộng:</td><td id="mealCostTotal" class="text-danger fs-5">0</td></tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xác nhận Dữ liệu Upload / Copy -->
+<div class="modal fade" id="previewChangesModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-clipboard-check"></i> Xác nhận dữ liệu cập nhật</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <p class="small text-muted mb-2">
+                    Các dữ liệu bị <span class="text-danger fw-bold"><i class="fa-solid fa-lock"></i> KHÓA</span> sẽ bị bỏ qua và giữ nguyên như cũ. 
+                    Chỉ lưu những dữ liệu <span class="text-success fw-bold">HỢP LỆ (Tô Xanh)</span>.
+                </p>
+                <div class="table-responsive" style="max-height: 60vh; overflow-y: auto;">
+                    <table class="table table-bordered table-hover text-center align-middle text-nowrap table-sm" style="font-size: 0.9em;">
+                        <thead class="table-light position-sticky top-0 z-1 shadow-sm">
+                            <tr>
+                                <th>Mã NV</th>
+                                <th class="text-start">Họ Tên</th>
+                                <th>Ngày</th>
+                                <th>Sáng</th>
+                                <th>Trưa</th>
+                                <th>Chiều</th>
+                                <th class="ot-col">Tăng ca</th>
+                                <th class="text-start">Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody id="preview-changes-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Hủy bỏ</button>
+                <button type="button" class="btn btn-success btn-sm fw-bold shadow-sm" onclick="confirmPendingChanges()"><i class="fa-solid fa-save"></i> TIẾP TỤC LƯU</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="sync-toast" class="toast align-items-center border-0 mb-2 shadow hide" data-bs-autohide="false" style="position:fixed; bottom:20px; right:20px; z-index:1060; width: 250px; background: white;">
+    <div class="toast-body py-2">
+        <div class="d-flex justify-content-between mb-1"><span class="fw-bold text-bim small" id="sync-toast-msg"><i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...</span><span class="fw-bold small text-bim" id="sync-toast-pct">0%</span></div>
+        <div class="progress" style="height: 6px;"><div id="sync-toast-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-bim" style="width: 0%;"></div></div>
+    </div>
+</div>
+
+<input type="file" id="excel-upload-input" accept=".xlsx, .xls" class="d-none" onchange="handleExcelUpload(event, 'ro')">
+<div id="toast-container"></div>
+<script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzrUlckKD_wwPWQJL4HXz2DESjo5uPg3N54cxUxyayq0yXE8G9-nVXL_Ok78lsRi5oK/exec';
+    let currentUser = null, dashboardData = [], employeeData = [], holidaysData = [], appSettings = {}, hcData = [];
+    let currentCycleOffset = 0, searchTimeout, realtimeTimer;
+    let selectedVcalDates = new Set(), unregChartInstance = null, unregDataCache = {}, currentUnregDept = ""; 
+    let fpInstances = {}; window.cycleOffsets = { ro: 0, mc: 0, unreg: 0 };
+    let cropper;
+    let tempMealCache = {};
+
+    let apiQueue = [], isSyncing = false, simInt;
+
+    // STATE PHÂN TRANG (Chỉ giữ lại các tab có ở index.html)
+    let pageState = {
+        mc: { page: 1, limit: 50 },
+        ro: { page: 1, limit: 50 }
+    };
+
+    // 1. TẠO ID DUY NHẤT CHO MỖI REQUEST (Chống trùng lặp)
+    function generateReqId() { return 'REQ_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); }
+
+    // 2. HÀM GỌI API TRUNG TÂM
+    async function fetchAPI(payload) {
+        if (!payload.reqId) payload.reqId = generateReqId();
+        let response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+        let text = await response.text();
+        try { return JSON.parse(text); } catch (e) { throw new Error("Lỗi định dạng dữ liệu từ máy chủ."); }
+    }
+
+    function updateSyncBadge() {
+        let badge = document.getElementById('manual-sync-badge'), icon = document.getElementById('manual-sync-icon');
+        if(badge && icon) {
+            if(apiQueue.length > 0) { badge.style.display = 'inline-block'; badge.innerText = apiQueue.length; icon.classList.add('fa-spin'); } 
+            else { badge.style.display = 'none'; icon.classList.remove('fa-spin'); }
+        }
+    }
+
+    function enqueueTask(payload, msg, onSuccess, onFail) { 
+        apiQueue.push({ payload, msg, onSuccess, onFail }); 
+        updateSyncBadge(); processApiQueue(); 
+    }
+    
+    function updateProgressUI(isStart, msg) {
+        let toast = document.getElementById('sync-toast'), bar = document.getElementById('sync-toast-bar'), pct = document.getElementById('sync-toast-pct'), msgTxt = document.getElementById('sync-toast-msg');
+        if(isStart) { 
+            toast.classList.remove('hide'); toast.classList.add('show'); msgTxt.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${msg || 'Đang lưu...'}`; bar.style.width = '0%'; pct.innerText = '0%'; 
+            clearInterval(simInt); let p = 0; simInt = setInterval(() => { p += (90 - p)*0.1; bar.style.width = p+'%'; pct.innerText = Math.round(p)+'%'; }, 100); 
+        } 
+        else { clearInterval(simInt); bar.style.width = '100%'; pct.innerText = '100%'; setTimeout(() => { toast.classList.remove('show'); toast.classList.add('hide'); }, 1000); }
+    }
+    
+    async function processApiQueue() {
+        if (isSyncing || apiQueue.length === 0) return; 
+        isSyncing = true; updateProgressUI(true, apiQueue[0].msg);
+        while (apiQueue.length > 0) { 
+            let currentTask = apiQueue[0];
+            try { 
+                let data = await fetchAPI(currentTask.payload); 
+                apiQueue.shift(); updateSyncBadge();
+                if (currentTask.onSuccess) currentTask.onSuccess(data); 
+            } catch (e) { 
+                apiQueue.shift(); updateSyncBadge();
+                if (currentTask.onFail) currentTask.onFail(e); 
+            } 
+            if (apiQueue.length > 0) updateProgressUI(true, apiQueue[0].msg);
+        }
+        updateProgressUI(false); isSyncing = false;
+    }
+
+    function manualSyncNow() {
+        let icon = document.getElementById('manual-sync-icon'); icon.classList.add('fa-spin');
+        enqueueTask({ action: 'get_dashboard', user: currentUser }, "Đang tải dữ liệu mới...", (json) => {
+            if(json.success) { 
+                dashboardData = json.data; 
+                checkNotifications(); showToast("Đã đồng bộ dữ liệu mới nhất!", "success");
+                
+                if(!document.getElementById('view-register').classList.contains('d-none') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                    if(document.getElementById('reg-personal').classList.contains('active')) { if(document.getElementById('mode-cycle').classList.contains('active')) renderRegGrid(); if(document.getElementById('mode-vcal').classList.contains('active')) renderVcal(); } 
+                    else if(document.getElementById('reg-others').classList.contains('active')) { renderRegOthersGrid(); } else if(document.getElementById('reg-unregistered').classList.contains('active')) { renderUnregistered(); }
+                }
+            }
+            setTimeout(() => { if(apiQueue.length === 0) icon.classList.remove('fa-spin'); }, 500);
+        });
+    }
+
+    function showToast(msg, type = 'secondary') { let cid = 't_' + Date.now(); document.getElementById('toast-container').insertAdjacentHTML('beforeend', `<div id="${cid}" class="toast align-items-center text-bg-${type} border-0 show mb-2 shadow"><div class="d-flex"><div class="toast-body fw-bold">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`); setTimeout(() => document.getElementById(cid)?.remove(), 3000); }
+
+    function attachScrollButtons() {
+        document.querySelectorAll('.table-responsive-stretch').forEach(el => {
+            if(el.parentElement.classList.contains('scroll-wrapper')) return;
+            let wrapper = document.createElement('div'); wrapper.className = 'scroll-wrapper position-relative w-100 mb-2'; el.parentNode.insertBefore(wrapper, el); wrapper.appendChild(el);
+            let leftBtn = document.createElement('button'); leftBtn.className = 'btn btn-secondary shadow position-absolute start-0 top-50 translate-middle-y z-3 scroll-btn-left d-none'; leftBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>'; leftBtn.style.opacity = '0.8'; leftBtn.style.marginLeft = '5px';
+            let rightBtn = document.createElement('button'); rightBtn.className = 'btn btn-secondary shadow position-absolute end-0 top-50 translate-middle-y z-3 scroll-btn-right d-none'; rightBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>'; rightBtn.style.opacity = '0.8'; rightBtn.style.marginRight = '5px';
+            wrapper.appendChild(leftBtn); wrapper.appendChild(rightBtn);
+            leftBtn.onclick = () => el.scrollBy({left: -300, behavior: 'smooth'}); rightBtn.onclick = () => el.scrollBy({left: 300, behavior: 'smooth'});
+            const checkScroll = () => { if(el.scrollWidth > el.clientWidth) { leftBtn.classList.toggle('d-none', el.scrollLeft <= 0); rightBtn.classList.toggle('d-none', el.scrollLeft >= el.scrollWidth - el.clientWidth - 1); } else { leftBtn.classList.add('d-none'); rightBtn.classList.add('d-none'); } };
+            el.addEventListener('scroll', checkScroll); window.addEventListener('resize', checkScroll); new MutationObserver(checkScroll).observe(el, {childList: true, subtree: true}); setTimeout(checkScroll, 500);
+        });
+    }
+
+    function renderPagination(prefix, totalRows, renderCallback) {
+        let container = document.getElementById('pagination-' + prefix); if(!container) return;
+        let limit = pageState[prefix].limit; let page = pageState[prefix].page;
+        if(limit === 'ALL') limit = totalRows; let totalPages = limit > 0 ? Math.ceil(totalRows / limit) : 1;
+        if (page > totalPages) page = totalPages; if (page < 1) page = 1; pageState[prefix].page = page;
+        if (totalRows === 0) { container.innerHTML = ''; return; }
+
+        let html = `
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="text-muted fw-bold">Hiển thị:</span>
+                <select class="form-select form-select-sm w-auto border-secondary fw-bold" onchange="pageState['${prefix}'].limit = this.value === 'ALL' ? 'ALL' : parseInt(this.value); pageState['${prefix}'].page = 1; ${renderCallback.name}();">
+                    <option value="50" ${limit === 50 ? 'selected' : ''}>50</option>
+                    <option value="200" ${limit === 200 ? 'selected' : ''}>200</option>
+                    <option value="ALL" ${pageState[prefix].limit === 'ALL' ? 'selected' : ''}>Tất cả</option>
+                </select>
+                <span class="text-muted ms-2 fw-bold">Dòng: ${(page - 1) * limit + 1} - ${Math.min(page * limit, totalRows)} / ${totalRows}</span>
+                <div class="ms-auto d-flex align-items-center gap-1">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="pageState['${prefix}'].page=1; ${renderCallback.name}();" ${page === 1 ? 'disabled' : ''}><i class="fa-solid fa-angles-left"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="pageState['${prefix}'].page--; ${renderCallback.name}();" ${page === 1 ? 'disabled' : ''}><i class="fa-solid fa-angle-left"></i></button>
+                    <input type="number" class="form-control form-control-sm text-center fw-bold border-secondary" style="width: 60px;" value="${page}" onchange="let p = parseInt(this.value); if(p>=1 && p<=${totalPages}) { pageState['${prefix}'].page = p; ${renderCallback.name}(); } else { this.value = ${page}; }">
+                    <span class="text-muted fw-bold">/ ${totalPages}</span>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="pageState['${prefix}'].page++; ${renderCallback.name}();" ${page === totalPages ? 'disabled' : ''}><i class="fa-solid fa-angle-right"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="pageState['${prefix}'].page=${totalPages}; ${renderCallback.name}();" ${page === totalPages ? 'disabled' : ''}><i class="fa-solid fa-angles-right"></i></button>
+                </div>
+            </div>`;
+        container.innerHTML = html;
+    }
+
+    function openAccountInfoModal() {
+        let emp = employeeData.find(e => e.mnv === currentUser.mnv); if(!emp) return;
+        if(currentUser.avatar || emp.avatar) { document.getElementById('acc-avatar').src = currentUser.avatar || emp.avatar; document.getElementById('acc-avatar').style.display = 'inline-block'; document.getElementById('acc-avatar-icon').style.display = 'none'; } 
+        else { document.getElementById('acc-avatar').style.display = 'none'; document.getElementById('acc-avatar-icon').style.display = 'inline-block'; }
+        document.getElementById('acc-name').innerText = emp.name; document.getElementById('acc-title-role').innerText = `${emp.title || 'Chưa cập nhật'} • ${emp.role || 'Nhan_Vien'}`;
+        document.getElementById('acc-mnv').innerText = emp.mnv; document.getElementById('acc-phone').innerText = emp.phone || '-'; document.getElementById('acc-email').innerText = emp.email || '-'; document.getElementById('acc-company').innerText = emp.company || '-';
+        let deptPath = [emp.dv, emp.bp1, emp.dept_cap2, emp.bp3, emp.bp4, emp.bp5].filter(Boolean).join(' &raquo; '); document.getElementById('acc-dept').innerHTML = deptPath || 'Chưa phân bổ';
+        new bootstrap.Modal(document.getElementById('accountInfoModal')).show();
+    }
+
+    function handleAvatarSelect(event) {
+        let file = event.target.files[0];
+        if(file) { 
+            let reader = new FileReader(); 
+            reader.onload = function(e) { 
+                document.getElementById('crop-image').src = e.target.result; 
+                new bootstrap.Modal(document.getElementById('cropAvatarModal')).show(); 
+                setTimeout(() => { let image = document.getElementById('crop-image'); if(cropper) cropper.destroy(); cropper = new Cropper(image, { aspectRatio: 1, viewMode: 1, dragMode: 'move', autoCropArea: 0.9, restore: false, guides: false, center: false, highlight: false, cropBoxMovable: true, cropBoxResizable: true, toggleDragModeOnDblclick: false }); }, 200); 
+            }; reader.readAsDataURL(file); 
+        } event.target.value = '';
+    }
+
+    function saveCroppedAvatar() {
+        if(!cropper) return; let canvas = cropper.getCroppedCanvas({ width: 400, height: 400 }); let base64 = canvas.toDataURL('image/jpeg', 0.8); 
+        bootstrap.Modal.getInstance(document.getElementById('cropAvatarModal')).hide();
+        enqueueTask({ action: 'upload_avatar', user: currentUser, mnv: currentUser.mnv, base64: base64 }, "Đang lưu ảnh đại diện...", (d) => {
+            if(d.success) { 
+                currentUser.avatar = d.avatarUrl; localStorage.setItem('bmms_user', JSON.stringify(currentUser)); 
+                document.getElementById('acc-avatar').src = d.avatarUrl; document.getElementById('acc-avatar').style.display = 'inline-block'; document.getElementById('acc-avatar-icon').style.display = 'none'; 
+                document.getElementById('top-user-avatar').src = d.avatarUrl; document.getElementById('top-user-avatar').style.display = 'block'; document.getElementById('top-user-icon').style.display = 'none'; 
+                let emp = employeeData.find(e => e.mnv === currentUser.mnv); if(emp) emp.avatar = d.avatarUrl; 
+                showToast("Đổi ảnh đại diện thành công!", "success"); 
+            } else { showToast("Lỗi khi lưu ảnh! Vui lòng kiểm tra quyền", "danger"); }
+        });
+    }
+
+    const ALL_COLS = [ { id: 'mnv', name: 'MÃ NV' }, { id: 'name', name: 'Họ Và Tên' }, { id: 'joinDate', name: 'Ngày gia nhập' }, { id: 'bp_goc', name: 'BP chấm công gốc' }, { id: 'bp1', name: 'Bộ phận cấp 1' }, { id: 'bp2', name: 'Bộ phận cấp 2' }, { id: 'title', name: 'Chức danh' } ];
+    const DEFAULT_COLS = { ro: ['mnv', 'name', 'joinDate', 'bp_goc', 'bp1', 'bp2', 'title'] };
+    let userCols = { ro: [] }; let activeColTab = ''; let colModalObj = null;
+
+    function initColConfig() {
+        let stored = localStorage.getItem('bmms_colconfig_' + currentUser.mnv);
+        try {
+            if(stored) { userCols = JSON.parse(stored); if (!userCols.ro) userCols.ro = []; ALL_COLS.forEach(cDef => { let exists = userCols.ro.find(c => c.id === cDef.id); if (!exists) userCols.ro.push({...cDef, visible: false}); }); } 
+            else { userCols.ro = ALL_COLS.map(c => ({...c, visible: true})); }
+        } catch(e) { userCols.ro = ALL_COLS.map(c => ({...c, visible: true})); }
+    }
+    
+    function openColSettings(tab) {
+        activeColTab = tab; if(!colModalObj) colModalObj = new bootstrap.Modal(document.getElementById('colSettingsModal')); let ul = document.getElementById('col-sortable-list'); ul.innerHTML = '';
+        userCols[tab].forEach((c) => { ul.innerHTML += `<li class="drag-item" draggable="true" data-id="${c.id}" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)"><i class="fa-solid fa-grip-vertical drag-handle"></i><input class="form-check-input ms-2 me-2" type="checkbox" ${c.visible ? 'checked' : ''} id="cb_${c.id}"><label class="form-check-label flex-grow-1 fw-bold small" for="cb_${c.id}">${c.name}</label></li>`; }); colModalObj.show();
+    }
+    
+    let dragEl = null;
+    function dragStart(e) { dragEl = e.target.closest('.drag-item'); e.dataTransfer.effectAllowed = 'move'; setTimeout(() => dragEl.classList.add('dragging'), 0); }
+    function dragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; let target = e.target.closest('.drag-item'); if(target && target !== dragEl) { let ul = document.getElementById('col-sortable-list'); let rect = target.getBoundingClientRect(); let next = (e.clientY - rect.top)/(rect.bottom - rect.top) > .5; ul.insertBefore(dragEl, next ? target.nextSibling : target); } }
+    function dragDrop(e) { e.stopPropagation(); dragEl.classList.remove('dragging'); return false; }
+    
+    function saveColConfig() {
+        let newCols = []; let items = document.querySelectorAll('#col-sortable-list .drag-item'); if(items.length === 0) return;
+        items.forEach(li => { let id = li.getAttribute('data-id'); let cDef = ALL_COLS.find(c => c.id === id); let cb = document.getElementById('cb_' + id); if(cDef && cb) { newCols.push({ id: id, name: cDef.name, visible: cb.checked }); } });
+        userCols[activeColTab] = newCols; localStorage.setItem('bmms_colconfig_' + currentUser.mnv, JSON.stringify(userCols)); colModalObj.hide();
+        if(activeColTab === 'ro') renderRegOthersGrid(); 
+    }
+
+    function buildTheadHTML(tab) {
+        let h = `<th style="width:50px;">STT</th>`;
+        if(userCols[tab]) { userCols[tab].filter(c => c.visible).forEach(c => h += `<th>${c.name}</th>`); }
+        h += `<th style="min-width: 60px;">Sáng</th><th style="min-width: 60px;">Trưa</th><th style="min-width: 60px;">Chiều</th><th class="ot-col" style="min-width: 70px;">Tăng ca</th><th class="text-start" style="min-width: 150px;">Ghi chú</th><th style="width:50px;">Xóa</th>`;
+        return h;
+    }
+    
+    function buildTbodyCols(tab, empData) {
+        let h = '';
+        if(userCols[tab]) {
+            userCols[tab].filter(c => c.visible).forEach(c => {
+                let v = empData[c.id] || '';
+                let textClass = '';
+                if(c.id === 'name') textClass = 'fw-bold text-primary';
+                if(c.id === 'mnv') textClass = 'fw-bold';
+                h += `<td class="text-start ${textClass}">${v}</td>`;
+            });
+        }
+        return h;
+    }
+
+    function updateSelectColor(sel) { sel.classList.remove('val-0', 'val-X', 'val-Y', 'val-'); sel.classList.add('val-' + sel.value); }
+
+    function toggleSubMenu(e) { e.preventDefault(); e.stopPropagation(); let sub = e.target.nextElementSibling; if(sub.classList.contains('show')) sub.classList.remove('show'); else { document.querySelectorAll('.dropdown-submenu .dropdown-menu').forEach(el => el.classList.remove('show')); sub.classList.add('show'); } }
+    document.addEventListener('click', function(e) { if(!e.target.closest('.dropdown-submenu')) document.querySelectorAll('.dropdown-submenu .dropdown-menu').forEach(el => el.classList.remove('show')); });
+    
+    function initFlatpickr() { 
+        flatpickr(".flatpickr-date:not(#unreg-date):not(#ro-date):not(#mc-date)", { dateFormat: "d/m/Y", allowInput: true }); 
+        ['unreg', 'ro', 'mc'].forEach(prefix => { 
+            let el = document.getElementById(`${prefix}-date`); 
+            if(el) { fpInstances[prefix] = flatpickr(el, { mode: "single", dateFormat: "d/m/Y", allowInput: true, onChange: function() { setTimeout(() => { if(prefix==='unreg') renderUnregistered(); if(prefix==='ro') { pageState.ro.page = 1; renderRegOthersGrid(); } if(prefix==='mc') { pageState.mc.page = 1; renderRegGrid(); } }, 10); } }); } 
+        }); 
+    }
+    
+    function searchTree(inp, ulId) { let txt = removeAccents(inp.value); document.querySelectorAll(`#${ulId} .tree-node`).forEach(li => { li.style.display = removeAccents(li.textContent).includes(txt) ? '' : 'none'; }); }
+    function searchList(inp, ulId) { let txt = removeAccents(inp.value); document.querySelectorAll(`#${ulId} li:not(.sticky-top)`).forEach(li => { if (li.querySelector('input[type="checkbox"]')) { let label = li.textContent || li.innerText; li.style.display = removeAccents(label).includes(txt) ? '' : 'none'; } }); }
+
+    function changeFilterType(prefix) { 
+        let type = document.getElementById(`${prefix}-filter-type`).value; let fp = fpInstances[prefix]; if(!fp) return; 
+        if(type === 'today') { fp.set('mode', 'single'); fp.setDate(new Date(), false); } 
+        else if (type === 'cycle') { fp.set('mode', 'range'); let c = getCycleDates(window.cycleOffsets[prefix]); fp.setDate([c.start, c.end], false); } 
+        else if (type === 'custom') { fp.set('mode', 'range'); let td = new Date(); fp.setDate([new Date(td.getFullYear(), td.getMonth(), 1), new Date(td.getFullYear(), td.getMonth()+1, 0)], false); } 
+        setTimeout(() => { if(prefix==='unreg') renderUnregistered(); if(prefix==='ro') { pageState.ro.page = 1; renderRegOthersGrid(); } if(prefix==='mc') { pageState.mc.page = 1; renderRegGrid(); } }, 10); 
+    }
+
+    function changeDateStep(prefix, dir) { 
+        let type = document.getElementById(`${prefix}-filter-type`).value; let fp = fpInstances[prefix]; if(!fp) return; 
+        if(type === 'today' || type === 'custom') { 
+            let dates = fp.selectedDates; 
+            if(dates.length === 1) { let d = new Date(dates[0]); d.setDate(d.getDate() + dir); fp.setDate(d, false); } 
+            else if(dates.length === 2) { let d1 = new Date(dates[0]); d1.setDate(d1.getDate() + dir); let d2 = new Date(dates[1]); d2.setDate(d2.getDate() + dir); fp.setDate([d1, d2], false); } 
+        } else if (type === 'cycle') { window.cycleOffsets[prefix] = (window.cycleOffsets[prefix] || 0) + dir; let c = getCycleDates(window.cycleOffsets[prefix]); fp.setDate([c.start, c.end], false); } 
+        setTimeout(() => { if(prefix==='unreg') renderUnregistered(); if(prefix==='ro') { pageState.ro.page = 1; renderRegOthersGrid(); } if(prefix==='mc') { pageState.mc.page = 1; renderRegGrid(); } }, 10); 
+    }
+    
+    function removeAccents(str) { return str ? String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : ''; }
+    function debounceSearch(fn, delay) { clearTimeout(searchTimeout); searchTimeout = setTimeout(fn, delay); }
+    function toDDMMYYYY(dateObj) { let d = dateObj.getDate().toString().padStart(2, '0'); let m = (dateObj.getMonth() + 1).toString().padStart(2, '0'); let y = dateObj.getFullYear(); return `${d}/${m}/${y}`; }
+    function getDatesInRange(dateStr) { if(!dateStr) return []; if(!dateStr.includes(' to ')) return [dateStr]; let p1 = dateStr.split(' to ')[0].split('/'); let start = new Date(p1[2], p1[1]-1, p1[0]); let p2 = dateStr.split(' to ')[1].split('/'); let end = new Date(p2[2], p2[1]-1, p2[0]); let dates = []; let loop = new Date(start); while(loop <= end) { dates.push(toDDMMYYYY(loop)); loop.setDate(loop.getDate() + 1); } return dates; }
+    function getCheckedStatuses(prefix) { return Array.from(document.querySelectorAll(`#filter-status-${prefix} .status-cb:checked`)).map(cb => cb.value); }
+    function getCheckedBpGoc(prefix) { return Array.from(document.querySelectorAll(`#filter-bpgoc-${prefix} .bpgoc-cb:checked`)).map(cb => cb.value); }
+    function parseToDateObj(dStr) { let p = dStr.split('/'); return new Date(p[2], parseInt(p[1])-1, p[0], 12, 0, 0); }
+
+    window.onload = () => { 
+        initFlatpickr(); checkLogin(); attachScrollButtons(); 
+    };
+
+    async function checkLogin() { 
+        const stored = localStorage.getItem('bmms_user') || sessionStorage.getItem('bmms_user');
+        if(stored) { 
+            try {
+                currentUser = JSON.parse(stored); 
+                let d = await fetchAPI({action: 'get_initial_data', user: currentUser});
+                if(d.success) { dashboardData = d.dashboard; employeeData = d.employees; holidaysData = d.holidays; appSettings = d.appSettings; initColConfig(); buildTreeFilters(); showApp(); }
+                else { showLoginView(); }
+            } catch (e) { showLoginView(); }
+        } else { showLoginView(); }
+    }
+    
+    function showLoginView() { document.getElementById('initial-loader').classList.add('d-none'); document.getElementById('view-login').classList.remove('d-none'); }
+    
+    async function handleLogin() {
+        const mnv = document.getElementById('login-mnv').value, pass = document.getElementById('login-pass').value, err = document.getElementById('login-error');
+        if(!mnv || !pass) return err.innerText = 'Nhập đủ thông tin';
+        document.getElementById('btn-login').disabled = true; document.getElementById('login-spinner').classList.remove('d-none');
+        try {
+            let res = await fetchAPI({ action: 'login', mnv: mnv.trim(), pass: pass.trim() });
+            if(res && res.success) { 
+                let remember = document.getElementById('remember-me').checked;
+                if(remember) localStorage.setItem('bmms_user', JSON.stringify(res.user)); else sessionStorage.setItem('bmms_user', JSON.stringify(res.user));
+                let initRes = await fetchAPI({ action: 'get_initial_data', user: res.user });
+                document.getElementById('btn-login').disabled = false; document.getElementById('login-spinner').classList.add('d-none');
+                if(initRes.success) { currentUser = initRes.user; dashboardData = initRes.dashboard; employeeData = initRes.employees; holidaysData = initRes.holidays; appSettings = initRes.appSettings; initColConfig(); buildTreeFilters(); showApp(); } 
+                else err.innerText = initRes.message;
+            } else { document.getElementById('btn-login').disabled = false; document.getElementById('login-spinner').classList.add('d-none'); err.innerText = res.message; }
+        } catch (e) { document.getElementById('btn-login').disabled = false; document.getElementById('login-spinner').classList.add('d-none'); err.innerText = "Lỗi kết nối!"; }
+    }
+    
+    function toggleForgotPass(isForgot) { if(isForgot) { document.getElementById('view-login-form').classList.add('d-none'); document.getElementById('view-forgot-form').classList.remove('d-none'); } else { document.getElementById('view-forgot-form').classList.add('d-none'); document.getElementById('view-login-form').classList.remove('d-none'); } }
+    
+    async function handleResetPassword() {
+        let mnv = document.getElementById('fg-mnv').value, phone = document.getElementById('fg-phone').value, cccd = document.getElementById('fg-cccd').value, newPass = document.getElementById('fg-new').value, confirmPass = document.getElementById('fg-confirm').value;
+        if(!mnv || !phone || !cccd || !newPass) return showToast('Vui lòng nhập đủ thông tin (*)', 'danger'); if(newPass !== confirmPass) return showToast('Mật khẩu mới không khớp!', 'danger');
+        document.getElementById('btn-forgot').disabled = true; 
+        try {
+            let res = await fetchAPI({ action: 'reset_password', mnv: mnv.trim(), phone: phone.trim(), cccd: cccd.trim(), newPass: newPass.trim() });
+            document.getElementById('btn-forgot').disabled = false;
+            if(res.success) { showToast(res.message, 'success'); toggleForgotPass(false); document.getElementById('login-pass').value = newPass; } else showToast(res.message, 'danger');
+        } catch (e) { document.getElementById('btn-forgot').disabled = false; showToast("Lỗi kết nối", "danger"); }
+    }
+
+    let cpModalObj;
+    function openChangePassModal() { if(!cpModalObj) cpModalObj = new bootstrap.Modal(document.getElementById('changePassModal')); document.getElementById('cp-old').value = ''; document.getElementById('cp-new').value = ''; document.getElementById('cp-confirm').value = ''; cpModalObj.show(); }
+    
+    async function submitChangePassword() { 
+        let oldPass = document.getElementById('cp-old').value, newPass = document.getElementById('cp-new').value, confirm = document.getElementById('cp-confirm').value; 
+        if(!oldPass || !newPass) return showToast("Nhập đủ thông tin!", 'danger'); 
+        if(newPass !== confirm) return showToast("Mật khẩu mới không khớp!", 'danger'); 
+        try {
+            let res = await fetchAPI({ action: 'change_password', mnv: currentUser.mnv, oldPass: oldPass.trim(), newPass: newPass.trim() });
+            if(res.success) { showToast(res.message, 'success'); cpModalObj.hide(); } else showToast(res.message, 'danger'); 
+        } catch (e) { showToast("Lỗi kết nối", "danger"); }
+    }
+
+    function logout() { localStorage.removeItem('bmms_user'); sessionStorage.removeItem('bmms_user'); location.reload(); }
+
+    function showApp() {
+        document.getElementById('initial-loader').classList.add('d-none'); document.getElementById('view-login').classList.add('d-none'); document.getElementById('app-wrapper').classList.remove('d-none');
+        document.getElementById('top-user-name').innerText = currentUser.name; document.getElementById('top-user-role').innerText = currentUser.role;
+        if(currentUser.avatar) { document.getElementById('top-user-avatar').src = currentUser.avatar; document.getElementById('top-user-avatar').style.display = 'block'; document.getElementById('top-user-icon').style.display = 'none'; }
+        if(currentUser.role === 'Nhan_Vien') document.body.classList.add('role-nhanvien'); else document.body.classList.remove('role-nhanvien');
+        if (window.Notification && Notification.permission !== 'granted' && Notification.permission !== 'denied') Notification.requestPermission();
+
+        const nav = document.getElementById('nav-menus'); 
+        
+        let perms = appSettings.userPerms ? appSettings.userPerms[currentUser.mnv] : null;
+        let f_ro = false, f_un = false, f_da = false, f_em = false, f_se = false, f_rep = false, f_adj = false;
+
+        if (perms && perms.features) {
+            f_ro = perms.features.includes('reg_others'); f_un = perms.features.includes('unreg'); f_da = perms.features.includes('dash'); f_em = perms.features.includes('emp'); f_se = perms.features.includes('settings'); f_rep = perms.features.includes('rep'); f_adj = perms.features.includes('adj');
+        }
+        
+        if (currentUser.role === 'Admin_full') { f_ro = f_un = f_da = f_em = f_se = f_rep = f_adj = true; } else if (currentUser.role === 'Bep_An') { f_da = true; }
+        
+        let canManage = f_ro || f_un || f_da || f_em || f_se || f_rep || f_adj;
+        
+        let menuHTML = '';
+        let currentPath = window.location.pathname;
+        let isIndex = currentPath.endsWith('/') || currentPath.endsWith('index.html');
+        let isBaoCao = currentPath.endsWith('bao-cao.html');
+        let isQuanLy = currentPath.endsWith('quan-ly.html');
+
+        if(canManage) {
+            menuHTML += `<li class="nav-item dropdown"><a class="nav-link dropdown-toggle menu-link ${isIndex ? 'active' : ''}" href="#" data-bs-toggle="dropdown" onclick="return false;"><i class="fa-solid fa-utensils"></i> Đăng ký</a><ul class="dropdown-menu shadow-sm">
+                        <li class="dropdown-submenu dropend"><a class="dropdown-item dropdown-toggle fw-bold text-secondary" href="#" onclick="toggleSubMenu(event)"><i class="fa-solid fa-user"></i> Cá nhân</a><ul class="dropdown-menu shadow-sm">
+                        <li><a class="dropdown-item fw-bold text-secondary" href="index.html" onclick="${isIndex ? "switchRegTab('reg-personal', this, 'mode-vcal'); return false;" : ""}">Theo lịch</a></li>
+                        <li><a class="dropdown-item fw-bold text-secondary" href="index.html" onclick="${isIndex ? "switchRegTab('reg-personal', this, 'mode-cycle'); return false;" : ""}">Dạng lưới</a></li></ul></li>`;
+            if(f_ro) menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="index.html" onclick="${isIndex ? "switchRegTab('reg-others', this); return false;" : ""}"><i class="fa-solid fa-users"></i> Đăng ký hộ</a></li>`;
+            if(f_un) menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="index.html" onclick="${isIndex ? "switchRegTab('reg-unregistered', this); return false;" : ""}"><i class="fa-solid fa-user-xmark"></i> Chưa đăng ký</a></li>`;
+            menuHTML += `</ul></li>`;
+            
+            if(f_rep || f_adj || f_da) {
+                menuHTML += `<li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle menu-link ${isBaoCao ? 'active' : ''}" href="#" data-bs-toggle="dropdown" onclick="return false;"><i class="fa-solid fa-chart-line"></i> Báo cáo & Thống kê</a>
+                    <ul class="dropdown-menu shadow-sm">`;
+                if(f_da) menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="bao-cao.html"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>`;    
+                if(f_adj) menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="bao-cao.html"><i class="fa-solid fa-pen-ruler"></i> Hiệu chỉnh</a></li>`;
+                if(f_rep) {
+                    menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="bao-cao.html"><i class="fa-solid fa-calendar-day text-danger"></i> Số check</a></li>
+                        <li><a class="dropdown-item fw-bold text-secondary" href="bao-cao.html"><i class="fa-solid fa-calendar-day text-success"></i> Thực tế (Theo ngày)</a></li>
+                        <li><a class="dropdown-item fw-bold text-secondary" href="bao-cao.html"><i class="fa-solid fa-table-list"></i> Tổng hợp</a></li>`;
+                }
+                menuHTML += `</ul></li>`;
+            }
+
+            if (f_em || f_se || currentUser.role === 'Admin_full') {
+                menuHTML += `<li class="nav-item dropdown"><a class="nav-link dropdown-toggle menu-link ${isQuanLy ? 'active' : ''}" href="#" data-bs-toggle="dropdown" onclick="return false;"><i class="fa-solid fa-briefcase"></i> Quản lý</a><ul class="dropdown-menu shadow-sm">`;
+                if(f_em) menuHTML += `<li><a class="dropdown-item fw-bold text-secondary" href="quan-ly.html"><i class="fa-solid fa-users-gear"></i> Nhân sự</a></li>`;
+                if(f_se || currentUser.role === 'Admin_full') {
+                    menuHTML += `<li><a class="dropdown-item fw-bold text-secondary admin-full-only" href="quan-ly.html"><i class="fa-solid fa-cogs"></i> Thiết lập</a></li>`;
+                    if (currentUser.role === 'Admin_full') {
+                        menuHTML += `<li><a class="dropdown-item fw-bold text-secondary admin-full-only" href="quan-ly.html"><i class="fa-solid fa-user-shield"></i> Phân quyền</a></li>`;
+                    }
+                }
+                menuHTML += `</ul></li>`;
+            }
+        } else { 
+            menuHTML += `<li class="nav-item dropdown"><a class="nav-link dropdown-toggle menu-link active" href="#" data-bs-toggle="dropdown" onclick="return false;"><i class="fa-solid fa-utensils"></i> Đăng ký</a><ul class="dropdown-menu shadow-sm">
+                        <li class="dropdown-submenu dropend"><a class="dropdown-item dropdown-toggle fw-bold text-secondary active" href="#" onclick="toggleSubMenu(event)"><i class="fa-solid fa-user"></i> Cá nhân</a><ul class="dropdown-menu shadow-sm">
+                        <li><a class="dropdown-item fw-bold text-secondary active" href="index.html" onclick="${isIndex ? "switchRegTab('reg-personal', this, 'mode-vcal'); return false;" : ""}">Theo lịch</a></li>
+                        <li><a class="dropdown-item fw-bold text-secondary" href="index.html" onclick="${isIndex ? "switchRegTab('reg-personal', this, 'mode-cycle'); return false;" : ""}">Dạng lưới</a></li></ul></li></ul></li>`; 
+        }
+        nav.innerHTML = menuHTML;
+        
+        loadSettingsToUI(); 
+        switchRegTab('reg-personal', nav.querySelector(canManage ? '.dropdown-item' : '.nav-link'), 'mode-vcal'); 
+        startRealtimeSync(); startCountdown(); checkNotifications();
+        
+        fpInstances['unreg'].setDate(new Date(), false); renderUnregistered();
+        fpInstances['ro'].setDate(new Date(), false); renderRegOthersGrid();
+        document.getElementById('mc-filter-type').value = 'cycle'; changeFilterType('mc');
+    }
+
+    function loadSettingsToUI() {
+        if (!appSettings.mealLocks) appSettings.mealLocks = { main:{d:1,h:16}, ot:{d:0,h:7}, sunMain:{d:1,h:16}, sunOt:{d:0,h:7} }; if (!appSettings.notify) appSettings.notify = {d:1, h:8};
+        let prices = appSettings.mealPrices || {bf: 0, lu: 0, di: 0, ot: 0};
+    }
+    
+    function switchRegTab(tabId, element, mode = null) {
+        document.querySelectorAll('#view-register > .tab-content > .tab-pane').forEach(el => el.classList.remove('show', 'active')); document.getElementById(tabId).classList.add('show', 'active');
+        document.querySelectorAll('.menu-link').forEach(link => link.classList.remove('active')); document.querySelectorAll('.dropdown-item').forEach(link => link.classList.remove('active', 'text-bim'));
+        if (element) { element.classList.add('active'); if (element.classList.contains('dropdown-item')) { element.classList.add('text-bim'); let parentLink = element.closest('.dropdown').querySelector('.nav-link'); if(parentLink) parentLink.classList.add('active'); let dropendToggle = element.closest('.dropdown-submenu')?.querySelector('.dropdown-toggle'); if(dropendToggle) dropendToggle.classList.add('active', 'text-bim'); } }
+        let navbarCollapse = document.getElementById('topNavMenu'); if (navbarCollapse.classList.contains('show')) new bootstrap.Collapse(navbarCollapse, {toggle: false}).hide();
+        setTimeout(() => { if(tabId === 'reg-personal') { if(mode === 'mode-vcal') { document.getElementById('mode-cycle').classList.remove('show', 'active'); document.getElementById('mode-vcal').classList.add('show', 'active'); renderVcal(); } else if (mode === 'mode-cycle') { document.getElementById('mode-vcal').classList.remove('show', 'active'); document.getElementById('mode-cycle').classList.add('show', 'active'); pageState.mc.page = 1; renderRegGrid(); } else { if(document.getElementById('mode-cycle').classList.contains('active')) { pageState.mc.page = 1; renderRegGrid(); } if(document.getElementById('mode-vcal').classList.contains('active')) renderVcal(); } } else if (tabId === 'reg-others') { pageState.ro.page = 1; renderRegOthersGrid(); } else if (tabId === 'reg-unregistered') { renderUnregistered(); } }, 10);
+    }
+    
+    function getShortMealName(val) { if(val === 'X') return 'BT'; if(val === 'Y') return 'HY'; return '_'; }
+    function getStyledMealName(val) { if(val === 'X') return '<span class="badge border border-primary text-primary bg-primary bg-opacity-10 fs-5 px-3 py-1 shadow-sm">BT</span>'; if(val === 'Y') return '<span class="badge border border-danger text-danger bg-danger bg-opacity-10 fs-5 px-3 py-1 shadow-sm">HY</span>'; return '<span class="text-muted">-</span>'; }
+
+    function startRealtimeSync() {
+        if(realtimeTimer) clearInterval(realtimeTimer);
+        let s = appSettings.syncSettings || { 'Admin_full': 30, 'Admin_BP': 30, 'Hành chính bộ phận': 30, 'Bep_An': 30, 'Nhan_Vien': 0 };
+        let intervalSec = s[currentUser.role];
+        if (intervalSec === undefined) intervalSec = 30; 
+        if (intervalSec <= 0) return; 
+        
+        realtimeTimer = setInterval(async () => {
+            try {
+                let json = await fetchAPI({ action: 'get_dashboard', user: currentUser });
+                if(json.success) { 
+                    dashboardData = json.data; 
+                    checkNotifications();
+                    if(!document.getElementById('view-register').classList.contains('d-none') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                        if(document.getElementById('reg-personal').classList.contains('active')) { if(document.getElementById('mode-cycle').classList.contains('active')) renderRegGrid(); if(document.getElementById('mode-vcal').classList.contains('active')) renderVcal(); } 
+                        else if(document.getElementById('reg-others').classList.contains('active')) { renderRegOthersGrid(); } else if(document.getElementById('reg-unregistered').classList.contains('active')) { renderUnregistered(); }
+                    }
+                }
+            } catch (e) { console.log("Realtime Sync Fail"); }
+        }, intervalSec * 1000); 
+    }
+
+    function startCountdown() { 
+        setInterval(() => { 
+            let now = new Date(); let confMainList = appSettings.mealLocks || {};
+            let nextMainLock = null, nextMainTarget = null;
+            for(let i = 0; i < 7; i++) {
+                let target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i); let isSun = target.getDay() === 0;
+                let cMain = isSun && confMainList.sunMain ? confMainList.sunMain : (confMainList.main || {d:1,h:16});
+                let lock = new Date(target); lock.setDate(lock.getDate() - cMain.d); lock.setHours(cMain.h, 0, 0, 0);
+                if (lock > now) { nextMainLock = lock; nextMainTarget = target; break; }
+            }
+            let nextOtLock = null, nextOtTarget = null;
+            for(let i = 0; i < 7; i++) {
+                let target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i); let isSun = target.getDay() === 0;
+                let cOt = isSun && confMainList.sunOt ? confMainList.sunOt : (confMainList.ot || {d:0,h:7});
+                let lock = new Date(target); lock.setDate(lock.getDate() + 1 - cOt.d); lock.setHours(cOt.h, 0, 0, 0);
+                if (lock > now) { nextOtLock = lock; nextOtTarget = target; break; }
+            }
+            let dMainFmt = nextMainTarget ? `${String(nextMainTarget.getDate()).padStart(2,'0')}.${String(nextMainTarget.getMonth()+1).padStart(2,'0')}` : "--.--";
+            let dOtFmt = nextOtTarget ? `${String(nextOtTarget.getDate()).padStart(2,'0')}.${String(nextOtTarget.getMonth()+1).padStart(2,'0')}` : "--.--";
+            let diffMain = nextMainLock ? (nextMainLock - now) : -1; let diffOt = nextOtLock ? (nextOtLock - now) : -1;
+            let fmt = (diff) => { if(diff < 0) return "00:00:00"; let h = Math.floor(diff/(1000*60*60)), m = Math.floor((diff%(1000*60*60))/(1000*60)), s = Math.floor((diff%(1000*60))/1000); return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; };
+            
+            let headerCount = document.getElementById('header-countdown');
+            if(headerCount) {
+                let isStaff = currentUser && !['admin_full', 'admin_bp'].includes(String(currentUser.role).trim().toLowerCase());
+                let otHtml = !isStaff ? `<div class="fw-bold text-nowrap"><i class="fa-solid fa-lock text-muted"></i> <span class="text-danger">OT: ${fmt(diffOt)} (${dOtFmt})</span></div>` : ''; 
+                headerCount.innerHTML = `<div class="d-flex flex-row flex-nowrap gap-3 justify-content-end align-items-center" style="font-size: 0.85em;"><div class="fw-bold text-nowrap"><i class="fa-solid fa-lock text-muted"></i> <span class="text-success">Cơm: ${fmt(diffMain)} (${dMainFmt})</span></div>${otHtml}</div>`;
+            }
+            if (now.getSeconds() === 0) checkNotifications();
+        }, 1000); 
+    }
+    
+    async function reloadDashboardData() { 
+        let d = await fetchAPI({ action: 'get_dashboard', user: currentUser });
+        if(d.success) { dashboardData = d.data; } 
+    }
+
+    function buildTreeFilters() {
+        let tree = {}; employeeData.forEach(e => { let path = [e.dv, e.bp1, e.dept_cap2, e.bp3, e.bp4, e.bp5].filter(Boolean); if(path.length === 0) path = ['Chưa phân bổ']; let current = tree; path.forEach(node => { if(!current[node]) current[node] = {}; current = current[node]; }); }); let html = buildTreeHTML(tree, 0, 'all');
+        document.querySelectorAll('.tree-dropdown-menu').forEach(el => { el.innerHTML = `<li class="p-2 sticky-top bg-white border-bottom"><input type="text" class="form-control form-control-sm" placeholder="Tìm bộ phận..." onkeyup="searchTree(this, '${el.id}')"></li><li><label class="fw-bold text-danger ps-2 mt-2 d-block"><input type="checkbox" onchange="treeCheckAll(this, '${el.id}')" checked> CHỌN TẤT CẢ</label></li>` + html; });
+        let bpGocs = [...new Set(employeeData.map(e => e.bp_goc))].filter(Boolean);
+        ['ro', 'unreg'].forEach(prefix => {
+            let ul = document.getElementById('filter-bpgoc-' + prefix);
+            if (ul) { ul.innerHTML = `<li class="p-2 sticky-top bg-white border-bottom z-3"><input type="text" class="form-control form-control-sm" placeholder="Tìm BP chấm công..." onkeyup="searchList(this, 'filter-bpgoc-${prefix}')"></li><li><label class="fw-bold text-danger ps-2 mt-2 d-block"><input type="checkbox" onchange="bpgocCheckAll(this, '${prefix}')" checked> CHỌN TẤT CẢ</label></li>` + bpGocs.map(b => `<li><label class="form-check-label w-100 px-2"><input type="checkbox" class="form-check-input bpgoc-cb me-2" value="${b}" checked onchange="triggerFilter('${prefix}')"> ${b}</label></li>`).join(''); }
+        });
+    }
+    
+    function bpgocCheckAll(masterCb, prefix) { document.querySelectorAll('#filter-bpgoc-' + prefix + ' .bpgoc-cb').forEach(cb => cb.checked = masterCb.checked); triggerFilter(prefix); }
+    function triggerFilter(prefix) { setTimeout(() => { if(prefix==='ro') { pageState.ro.page = 1; renderRegOthersGrid(); } if(prefix==='unreg') renderUnregistered(); }, 10); }
+    function buildTreeHTML(nodeObj, level, parentId) { let html = ''; let i = 0; for (let key in nodeObj) { let id = `${parentId}_${level}_${i++}`; let hasChild = Object.keys(nodeObj[key]).length > 0; html += `<li class="tree-node"><label><input type="checkbox" class="tree-cb" value="${key}" data-id="${id}" data-pid="${parentId}" onchange="treeCheck(this)" checked> <span class="${level===0?'fw-bold text-primary':''}">${key}</span></label>`; if(hasChild) html += `<ul class="tree-root" id="group_${id}">` + buildTreeHTML(nodeObj[key], level + 1, id) + `</ul>`; html += `</li>`; } return html; }
+    function treeCheck(cb) { let isChecked = cb.checked; let id = cb.getAttribute('data-id'); let group = document.getElementById(`group_${id}`); if(group) group.querySelectorAll('.tree-cb').forEach(childCb => childCb.checked = isChecked); setTimeout(() => { if(document.getElementById('reg-others').classList.contains('active')) { pageState.ro.page = 1; renderRegOthersGrid(); } if(document.getElementById('reg-unregistered').classList.contains('active')) renderUnregistered(); }, 10); }
+    function treeCheckAll(masterCb, containerId) { document.getElementById(containerId).querySelectorAll('.tree-cb').forEach(cb => cb.checked = masterCb.checked); setTimeout(() => { if (containerId.includes('unreg')) renderUnregistered(); else { pageState.ro.page = 1; renderRegOthersGrid(); } }, 10); }
+    function getCheckedTreeVals(containerId) { return Array.from(document.getElementById(containerId).querySelectorAll('.tree-cb:checked')).map(cb => cb.value); }
+    function getCycleDates(offset) { let d = new Date(); d.setMonth(d.getMonth() + offset); let day = d.getDate(), month = d.getMonth(), year = d.getFullYear(); let sMonth = day >= 24 ? month : month - 1; return { start: new Date(year, sMonth, 24), end: new Date(year, sMonth + 1, 23) }; }
+    
+    function getLockStatus(loopTime, empLeaveDateStr) { 
+        let res = { bf: false, lu: false, di: false, ot: false, all: false, reason: '' };
+        if (currentUser && String(currentUser.role).trim().toLowerCase() === 'admin_full') return res;
+        
+        let now = new Date(); let targetDate = new Date(loopTime); let isSun = targetDate.getDay() === 0;
+        let confMain = appSettings.mealLocks ? (isSun && appSettings.mealLocks.sunMain ? appSettings.mealLocks.sunMain : appSettings.mealLocks.main) : { d:1, h:16 }; if(!confMain) confMain = { d:1, h:16 };
+        let lockTimeMain = new Date(targetDate); lockTimeMain.setDate(lockTimeMain.getDate() - confMain.d); lockTimeMain.setHours(confMain.h, 0, 0, 0);
+        
+        if (now >= lockTimeMain) { res.bf = true; res.lu = true; res.di = true; res.reason = 'Quá giờ khóa suất ăn chính'; }
+        
+        let confOt = appSettings.mealLocks ? (isSun && appSettings.mealLocks.sunOt ? appSettings.mealLocks.sunOt : appSettings.mealLocks.ot) : { d:0, h:7 }; if(!confOt) confOt = { d:0, h:7 };
+        let lockTimeOt = new Date(targetDate); lockTimeOt.setDate(lockTimeOt.getDate() + 1 - confOt.d); lockTimeOt.setHours(confOt.h, 0, 0, 0);
+        
+        if (now >= lockTimeOt) { res.ot = true; if(!res.reason) res.reason = 'Quá giờ khóa suất tăng ca'; else res.reason += ' & Quá giờ khóa OT'; }
+        
+        let isStaff = currentUser && !['admin_full', 'admin_bp'].includes(String(currentUser.role).trim().toLowerCase());
+        if (isStaff) { res.ot = true; }
+        
+        let dStr = targetDate.toLocaleDateString('en-CA'); let hol = holidaysData.find(h => h.date === dStr);
+        if (hol) { let holOffset = hol.offset || 0; let lk = new Date(targetDate); lk.setDate(lk.getDate() - holOffset); lk.setHours(0,0,0,0); if (now >= lk) { res.bf = res.lu = res.di = res.ot = res.all = true; res.reason = `Bị khóa do ngày Lễ/Tết (${hol.name})`; } }
+        
+        if (empLeaveDateStr) { 
+            let p = empLeaveDateStr.split('/'); 
+            if(p.length === 3) { let ldObj = new Date(p[2], p[1]-1, p[0]); let offset = appSettings.leaveOffset || 0; let lockAppTime = new Date(ldObj); lockAppTime.setDate(lockAppTime.getDate() - offset); lockAppTime.setHours(0,0,0,0); if (targetDate >= ldObj && now >= lockAppTime) { res.bf = res.lu = res.di = res.ot = res.all = true; res.reason = 'Nhân viên đã nghỉ việc'; } } 
+        }
+        return res; 
+    }
+
+    function enforceOtSelectPermission() { 
+        let isStaff = currentUser && !['admin_full', 'admin_bp'].includes(String(currentUser.role).trim().toLowerCase());
+        if (isStaff) { document.querySelectorAll('.ot-select, #vc-ot, #sd-ot').forEach(el => { el.disabled = true; el.value = '0'; el.style.backgroundColor = '#e9ecef'; el.style.cursor = 'not-allowed'; el.style.opacity = '1'; }); } 
+    }
+
+    function updateLocalDashboardData(mnv, dateStr, bf, lu, di, ot, note) {
+        let ex = dashboardData.find(m => String(m.mnv) === String(mnv) && m.date === dateStr);
+        if (ex) { ex.breakfast = bf; ex.lunch = lu; ex.dinner = di; ex.ot = ot; if (note !== undefined) ex.note = note; }
+        else { let eObj = employeeData.find(e => String(e.mnv) === String(mnv)) || {name:'', gender:'', phone:'', cccd:'', email:'', title:'', bp_goc:'', dv:'', bp1:'', dept_cap2:''}; dashboardData.push({ mnv: mnv, name: eObj.name, gender: eObj.gender, phone: eObj.phone, cccd: eObj.cccd, email: eObj.email, title: eObj.title, bp_goc: eObj.bp_goc, dv: eObj.dv, bp1: eObj.bp1, bp2: eObj.dept_cap2, dept: eObj.dept_cap2, date: dateStr, breakfast: bf, lunch: lu, dinner: di, ot: ot, note: note || '' }); }
+    }
+
+    function cacheRow(el, mnv, dateStr) {
+        let tr = el.closest('tr'); if(!tr) return;
+        let bfEl = tr.querySelector('.ms-bf'); let bf = bfEl ? bfEl.value : '0';
+        let luEl = tr.querySelector('.ms-lu'); let lu = luEl ? luEl.value : '0';
+        let diEl = tr.querySelector('.ms-di'); let di = diEl ? diEl.value : '0';
+        let otEl = tr.querySelector('.ms-ot'); let ot = otEl ? otEl.value : '0';
+        let note = tr.querySelector('.meal-note')?.value || '';
+        tempMealCache[`${mnv}_${dateStr}`] = { mnv: mnv, name: tr.getAttribute('data-name') || '', date: dateStr, breakfast: bf, lunch: lu, dinner: di, ot: ot, note: note };
+    }
+
+    function clearMealRow(btn, mnv, dDisplay) {
+        let tr = btn.closest('tr'); let selects = tr.querySelectorAll('select');
+        selects.forEach(s => { if (!s.disabled && s.value !== '0') { s.value = '0'; updateSelectColor(s); } });
+        let note = tr.querySelector('.meal-note'); if (note && !note.disabled && note.value !== '') note.value = '';
+        cacheRow(btn, mnv, dDisplay);
+    }
+
+    function changeRegCycle(dir) { currentCycleOffset += dir; renderVcal(); }
+    
+    function openMealCostModal() {
+        let prices = appSettings.mealPrices || {bf: 0, lu: 0, di: 0, ot: 0};
+        let sang = parseInt(document.getElementById('mc-sang').innerText) || 0; let trua = parseInt(document.getElementById('mc-trua').innerText) || 0; let toi = parseInt(document.getElementById('mc-toi').innerText) || 0; let ot = parseInt(document.getElementById('mc-ot').innerText) || 0;
+        let moneySang = sang * prices.bf; let moneyTrua = trua * prices.lu; let moneyToi = toi * prices.di; let moneyOt = ot * prices.ot; let total = moneySang + moneyTrua + moneyToi + moneyOt;
+        let tbody = document.getElementById('mealCostTableBody');
+        tbody.innerHTML = `<tr><td class="fw-bold text-primary">Sáng</td><td>${sang}</td><td>${prices.bf.toLocaleString('en-US')}</td><td>${moneySang.toLocaleString('en-US')}</td></tr><tr><td class="fw-bold text-success">Trưa</td><td>${trua}</td><td>${prices.lu.toLocaleString('en-US')}</td><td>${moneyTrua.toLocaleString('en-US')}</td></tr><tr><td class="fw-bold" style="color: #6f42c1;">Chiều</td><td>${toi}</td><td>${prices.di.toLocaleString('en-US')}</td><td>${moneyToi.toLocaleString('en-US')}</td></tr><tr class="ot-col"><td class="fw-bold text-danger">Tăng ca</td><td>${ot}</td><td>${prices.ot.toLocaleString('en-US')}</td><td>${moneyOt.toLocaleString('en-US')}</td></tr>`;
+        document.getElementById('mealCostTotal').innerText = total.toLocaleString('en-US') + ' VNĐ';
+        new bootstrap.Modal(document.getElementById('mealCostModal')).show(); enforceOtSelectPermission();
+    }
+
+    function checkNotifications() {
+        if(!appSettings.notify) return; 
+        let now = new Date(); let targetDate = new Date(now); targetDate.setDate(targetDate.getDate() + appSettings.notify.d); targetDate.setHours(0,0,0,0); 
+        let remindTime = new Date(targetDate); remindTime.setDate(remindTime.getDate() - appSettings.notify.d); remindTime.setHours(appSettings.notify.h,0,0,0);
+        let bell = document.getElementById('bell-icon'); let badge = document.getElementById('notif-badge'); let list = document.getElementById('notif-list');
+        let readNotifs = JSON.parse(localStorage.getItem('bmms_read_notifs') || '{}');
+
+        if (now >= remindTime && now < new Date(remindTime.getTime() + 86400000)) { 
+            let dDisplay = toDDMMYYYY(targetDate); let myMeal = dashboardData.find(m => String(m.mnv) === String(currentUser.mnv) && m.date === dDisplay);
+            let notifId = `notif_${dDisplay}`;
+            if (!myMeal || (myMeal.breakfast==='0' && myMeal.lunch==='0' && myMeal.dinner==='0' && myMeal.ot==='0')) { 
+                let msg = `Bạn chưa đăng ký suất ăn cho ngày ${dDisplay}!`; let timeStr = remindTime.toLocaleString('vi-VN'); let isRead = readNotifs[notifId];
+                if (!isRead) {
+                    if (!bell.classList.contains('ringing')) { bell.classList.add('ringing'); badge.classList.remove('d-none'); if (window.Notification && Notification.permission === 'granted') { new Notification("BIM Meal Management", { body: msg, icon: 'https://lh3.googleusercontent.com/d/18DgW1i6MtUKwa1pfHG92FxBZ6J_yA1MW' }); } }
+                    list.innerHTML = `<li><a class="dropdown-item fw-bold text-danger text-wrap" href="#" onclick="switchRegTab('reg-personal', null, 'mode-vcal'); markRead('${notifId}')"><i class="fa-solid fa-triangle-exclamation"></i> ${msg}<br><small class="text-muted fw-normal">Lúc: ${timeStr}</small></a></li>`; 
+                } else { bell.classList.remove('ringing'); badge.classList.add('d-none'); list.innerHTML = `<li><a class="dropdown-item text-secondary text-wrap" href="#" onclick="switchRegTab('reg-personal', null, 'mode-vcal')"><i class="fa-solid fa-check text-success"></i> ${msg}<br><small class="text-muted fw-normal">Lúc: ${timeStr}</small></a></li>`; }
+                bell.parentElement.setAttribute('data-current-notif', notifId);
+            } else { bell.classList.remove('ringing'); badge.classList.add('d-none'); list.innerHTML = `<li class="text-center text-muted small py-2">Không có thông báo mới</li>`; bell.parentElement.removeAttribute('data-current-notif'); }
+        } else { bell.classList.remove('ringing'); badge.classList.add('d-none'); list.innerHTML = `<li class="text-center text-muted small py-2">Không có thông báo mới</li>`; bell.parentElement.removeAttribute('data-current-notif'); }
+    }
+    
+    function markRead(specificId = null) { 
+        let notifId = specificId || document.getElementById('bell-icon').parentElement.getAttribute('data-current-notif');
+        if (notifId) { let readNotifs = JSON.parse(localStorage.getItem('bmms_read_notifs') || '{}'); readNotifs[notifId] = true; localStorage.setItem('bmms_read_notifs', JSON.stringify(readNotifs)); }
+        document.getElementById('bell-icon').classList.remove('ringing'); document.getElementById('notif-badge').classList.add('d-none'); checkNotifications();
+    }
+
+    // REG GRID (KỲ)
+    function renderRegGrid() {
+        let dStrInput = document.getElementById('mc-date').value; if(!dStrInput) return;
+        let dStart, dEnd;
+        if(dStrInput.includes(' to ')) { let parts = dStrInput.split(' to '); let p1 = parts[0].split('/'); dStart = new Date(p1[2], p1[1]-1, p1[0]); dStart.setHours(0,0,0); let p2 = parts[1].split('/'); dEnd = new Date(p2[2], p2[1]-1, p2[0]); dEnd.setHours(23,59,59); } 
+        else { let p1 = dStrInput.split('/'); dStart = new Date(p1[2], p1[1]-1, p1[0]); dStart.setHours(0,0,0); dEnd = new Date(dStart); dEnd.setHours(23,59,59); }
+
+        let tbody = document.getElementById('reg-grid-body'); let html = []; 
+        let loop = new Date(dStart); const wDays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']; let mnv = currentUser.mnv;
+        let getOpts = (val) => `<option value="0" ${val==='0'||!val?'selected':''}>Không</option><option value="X" ${val==='X'?'selected':''}>Bãi Trường</option><option value="Y" ${val==='Y'?'selected':''}>Hyatt</option>`;
+        let buildSel = (cls, val, disabled, dDisplay) => `<select class="form-select form-select-sm meal-select val-${val} ${cls}" ${disabled ? 'disabled' : ''} onchange="updateSelectColor(this); cacheRow(this, '${mnv}', '${dDisplay}')">${getOpts(val)}</select>`;
+        let sumSangBt = 0, sumSangHy = 0, sumTruaBt = 0, sumTruaHy = 0, sumToiBt = 0, sumToiHy = 0, sumOtBt = 0, sumOtHy = 0;
+        let allRowsData = [];
+
+        while(loop <= dEnd) {
+            let lTime = loop.getTime(), dStr = loop.toLocaleDateString('en-CA'), dDisplay = toDDMMYYYY(loop);
+            let locks = getLockStatus(lTime, currentUser.leaveDate); 
+            let isSun = loop.getDay() === 0; let hol = holidaysData.find(h => h.date === dStr); let isAllLocked = locks.all; 
+            let rowClass = isAllLocked ? 'row-locked' : (hol ? 'row-holiday' : (isSun ? 'row-sunday' : ''));
+            let myMeal = dashboardData.find(m => String(m.mnv) === String(mnv) && m.date === dDisplay);
+            let cache = tempMealCache[`${mnv}_${dDisplay}`];
+            let bfVal = cache ? cache.breakfast : (myMeal ? myMeal.breakfast || '0' : '0'); let luVal = cache ? cache.lunch : (myMeal ? myMeal.lunch || '0' : '0'); let diVal = cache ? cache.dinner : (myMeal ? myMeal.dinner || '0' : '0'); let otVal = cache ? cache.ot : (myMeal ? myMeal.ot || '0' : '0'); let noteVal = cache ? cache.note : (myMeal ? myMeal.note || '' : '');
+            
+            if(bfVal === 'X') sumSangBt++; else if (bfVal === 'Y') sumSangHy++; if(luVal === 'X') sumTruaBt++; else if (luVal === 'Y') sumTruaHy++; if(diVal === 'X') sumToiBt++; else if (diVal === 'Y') sumToiHy++; if(otVal === 'X') sumOtBt++; else if (otVal === 'Y') sumOtHy++;
+
+            allRowsData.push({ dDisplay: dDisplay, wDay: wDays[loop.getDay()], hol: hol, locks: locks, rowClass: rowClass, isAllLocked: isAllLocked, isSun: isSun, bfVal: bfVal, luVal: luVal, diVal: diVal, otVal: otVal, noteVal: noteVal });
+            loop.setDate(loop.getDate() + 1);
+        }
+
+        renderPagination('mc', allRowsData.length, renderRegGrid);
+        let limit = pageState.mc.limit === 'ALL' ? allRowsData.length : pageState.mc.limit; let page = pageState.mc.page;
+        let pagedData = allRowsData.slice((page - 1) * limit, page * limit);
+
+        pagedData.forEach(r => {
+            let selBf = buildSel('ms-bf', r.bfVal, r.locks.bf, r.dDisplay); let selLu = buildSel('ms-lu', r.luVal, r.locks.lu, r.dDisplay); let selDi = buildSel('ms-di', r.diVal, r.locks.di, r.dDisplay); let selOt = buildSel('ms-ot ot-select', r.otVal, r.locks.ot, r.dDisplay);
+            let escapedNote = String(r.noteVal).replace(/"/g, '&quot;');
+            let inpNote = r.isAllLocked ? `<input type="text" class="form-control form-control-sm border-0 meal-note text-center" disabled value="${escapedNote}" title="${r.locks.reason}">` : `<input type="text" class="form-control form-control-sm border-secondary meal-note text-center" value="${escapedNote}" onblur="cacheRow(this, '${mnv}', '${r.dDisplay}')">`;
+            html.push(`<tr class="${r.rowClass}" data-date="${r.dDisplay}" data-mnv="${mnv}">
+                <td class="fw-bold align-middle ${r.isAllLocked?'text-muted':''}" ${r.isAllLocked ? `title="${r.locks.reason}"` : ''}>${r.dDisplay}<br>${r.hol?`<small class="text-success fw-bold">${r.hol.name}</small>`:''}</td>
+                <td class="align-middle fw-bold ${r.isSun?'text-danger':(r.hol?'text-success':'')}">${r.wDay}</td>
+                <td class="align-middle" ${r.locks.bf ? `title="${r.locks.reason}"` : ''}>${selBf}</td><td class="align-middle" ${r.locks.lu ? `title="${r.locks.reason}"` : ''}>${selLu}</td><td class="align-middle" ${r.locks.di ? `title="${r.locks.reason}"` : ''}>${selDi}</td><td class="align-middle ot-col" ${r.locks.ot ? `title="${r.locks.reason}"` : ''}>${selOt}</td><td class="align-middle">${inpNote}</td>
+                <td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="clearMealRow(this, '${mnv}', '${r.dDisplay}')" title="Xóa chọn dòng này" ${r.isAllLocked ? 'disabled' : ''}><i class="fa-solid fa-trash"></i></button></td>
+            </tr>`);
+        });
+
+        tbody.innerHTML = html.length > 0 ? html.join('') : `<tr><td colspan="8" class="text-center text-muted">Không có dữ liệu ngày</td></tr>`; enforceOtSelectPermission();
+        document.getElementById('mc-sang').innerText = sumSangBt + sumSangHy; document.getElementById('mc-sang-bt').innerText = sumSangBt; document.getElementById('mc-sang-hy').innerText = sumSangHy; 
+        document.getElementById('mc-trua').innerText = sumTruaBt + sumTruaHy; document.getElementById('mc-trua-bt').innerText = sumTruaBt; document.getElementById('mc-trua-hy').innerText = sumTruaHy; 
+        document.getElementById('mc-toi').innerText = sumToiBt + sumToiHy; document.getElementById('mc-toi-bt').innerText = sumToiBt; document.getElementById('mc-toi-hy').innerText = sumToiHy; 
+        document.getElementById('mc-ot').innerText = sumOtBt + sumOtHy; document.getElementById('mc-ot-bt').innerText = sumOtBt; document.getElementById('mc-ot-hy').innerText = sumOtHy;
+    }
+
+    function renderVcal() {
+        let dates = getCycleDates(currentCycleOffset); document.getElementById('vcal-cycle-title').innerText = `Kỳ: ${toDDMMYYYY(dates.start)} - ${toDDMMYYYY(dates.end)}`;
+        let container = document.getElementById('vcal-grid'); let html = []; let startDay = dates.start.getDay(); let padding = startDay === 0 ? 6 : startDay - 1; for(let i = 0; i < padding; i++) html.push(`<div class="vcal-box empty"></div>`);
+        let loop = new Date(dates.start); let todayDisplay = toDDMMYYYY(new Date());
+
+        while(loop <= dates.end) {
+            let lTime = loop.getTime(), dStr = loop.toLocaleDateString('en-CA'), dDisplay = toDDMMYYYY(loop);
+            let locks = getLockStatus(lTime, currentUser.leaveDate); let isAllLocked = locks.all || (locks.bf && locks.lu && locks.di && locks.ot); 
+            let isSun = loop.getDay() === 0; let hol = holidaysData.find(h => h.date === dStr);
+            let classes = ['vcal-box']; 
+            if (dDisplay === todayDisplay) classes.push('today');
+            if(isAllLocked) classes.push('locked'); else { if(hol) classes.push('hol'); else if(isSun) classes.push('sun'); } 
+            if(selectedVcalDates.has(dDisplay) && !isAllLocked) classes.push('selected'); 
+
+            let dShortRaw = `${String(loop.getDate()).padStart(2,'0')}/${String(loop.getMonth()+1).padStart(2,'0')}`;
+            let dShort = `<span class="date-text">${dShortRaw}</span>`;
+
+            let myMeal = dashboardData.find(m => String(m.mnv) === String(currentUser.mnv) && m.date === dDisplay);
+            let mealText = "";
+            if (myMeal && (myMeal.breakfast !== '0' || myMeal.lunch !== '0' || myMeal.dinner !== '0' || myMeal.ot !== '0')) {
+                let mArr = [];
+                if(myMeal.breakfast && myMeal.breakfast !== '0') mArr.push(`<span class="badge border border-primary text-primary bg-primary bg-opacity-10 fw-bold">Sáng: ${getShortMealName(myMeal.breakfast)}</span>`);
+                if(myMeal.lunch && myMeal.lunch !== '0') mArr.push(`<span class="badge border border-success text-success bg-success bg-opacity-10 fw-bold">Trưa: ${getShortMealName(myMeal.lunch)}</span>`);
+                if(myMeal.dinner && myMeal.dinner !== '0') mArr.push(`<span class="badge border fw-bold" style="color: #6f42c1; border-color: #6f42c1; background-color: rgba(111, 66, 193, 0.1);">Chiều: ${getShortMealName(myMeal.dinner)}</span>`);
+                if(currentUser.role !== 'Nhan_Vien' && myMeal.ot && myMeal.ot !== '0') mArr.push(`<span class="badge border border-danger text-danger bg-danger bg-opacity-10 fw-bold">OT: ${getShortMealName(myMeal.ot)}</span>`);
+                mealText = `<div class="meal-info">` + mArr.join('') + `</div>`;
+            }
+
+            html.push(`<div class="${classes.join(' ')}" data-date="${dDisplay}" data-lockbf="${locks.bf}" data-locklu="${locks.lu}" data-lockdi="${locks.di}" data-lockot="${locks.ot}" title="${locks.reason || ''}" onpointerdown="lpStart(event, this, '${dStr}', '${locks.bf}', '${locks.lu}', '${locks.di}', '${locks.ot}')" onpointermove="lpMove()" onpointerup="lpEnd()" onpointercancel="lpEnd()" onpointerleave="lpEnd()" onclick="lpClick(this)"><div class="fw-bold fs-6">${dShort}</div>${hol ? `<div class="small lh-1 text-success fw-bold mt-1" style="font-size: 0.9em;">${hol.name}</div>` : ''}${mealText}</div>`); loop.setDate(loop.getDate() + 1);
+        }
+        container.innerHTML = html.join(''); enforceOtSelectPermission(); updateRightPanelLocks(); 
+    }
+
+    let longPressTimer, isDragging = false;
+    function lpStart(e, box, dStr, lBf, lLu, lDi, lOt) { isDragging = false; if(lBf==='true' && lLu==='true' && lDi==='true' && lOt==='true') return; longPressTimer = setTimeout(() => { isDragging = true; box.classList.remove('selected'); let dDisplay = box.getAttribute('data-date'); selectedVcalDates.delete(dDisplay); openSingleDateModal(dStr, lBf, lLu, lDi, lOt); }, 200); }
+    function lpMove() { isDragging = true; clearTimeout(longPressTimer); }
+    function lpEnd() { clearTimeout(longPressTimer); }
+    function lpClick(box) { clearTimeout(longPressTimer); if(isDragging) return; if(!box.classList.contains('locked')) { let dDisplayStr = box.getAttribute('data-date'); if(box.classList.contains('selected')) { box.classList.remove('selected'); selectedVcalDates.delete(dDisplayStr); } else { box.classList.add('selected'); selectedVcalDates.add(dDisplayStr); } updateRightPanelLocks(); } }
+    
+    let sdModal;
+    function openSingleDateModal(dStr, lBf, lLu, lDi, lOt) {
+        if(!sdModal) sdModal = new bootstrap.Modal(document.getElementById('singleDateModal'));
+        let dDisplay = toDDMMYYYY(new Date(dStr)); document.getElementById('singleDateTitle').innerText = 'Đăng ký ' + dDisplay; document.getElementById('sd-date').value = dDisplay;
+        let myMeal = dashboardData.find(m => String(m.mnv) === String(currentUser.mnv) && m.date === dDisplay);
+        document.getElementById('sd-bf').value = (myMeal && myMeal.breakfast) ? myMeal.breakfast : '0'; document.getElementById('sd-lu').value = (myMeal && myMeal.lunch) ? myMeal.lunch : '0'; document.getElementById('sd-di').value = (myMeal && myMeal.dinner) ? myMeal.dinner : '0'; document.getElementById('sd-ot').value = (myMeal && myMeal.ot) ? myMeal.ot : '0'; document.getElementById('sd-note').value = myMeal ? myMeal.note : '';
+        document.getElementById('sd-bf').disabled = (lBf === 'true'); document.getElementById('sd-lu').disabled = (lLu === 'true'); document.getElementById('sd-di').disabled = (lDi === 'true'); document.getElementById('sd-ot').disabled = (lOt === 'true'); enforceOtSelectPermission(); sdModal.show();
+    }
+    
+    function clearSingleDate() {
+        let isBfDisabled = document.getElementById('sd-bf').disabled, isLuDisabled = document.getElementById('sd-lu').disabled, isDiDisabled = document.getElementById('sd-di').disabled, isOtDisabled = document.getElementById('sd-ot').disabled;
+        if(isBfDisabled && isLuDisabled && isDiDisabled && isOtDisabled) return showToast("Không thể xóa do suất ăn đã bị khóa toàn bộ!", "danger");
+
+        let dDisplay = document.getElementById('sd-date').value;
+        let myMeal = dashboardData.find(m => String(m.mnv) === String(currentUser.mnv) && m.date === dDisplay);
+        let bf = isBfDisabled ? (myMeal ? myMeal.breakfast || '0' : '0') : '0'; let lu = isLuDisabled ? (myMeal ? myMeal.lunch || '0' : '0') : '0'; let di = isDiDisabled ? (myMeal ? myMeal.dinner || '0' : '0') : '0'; let ot = isOtDisabled ? (myMeal ? myMeal.ot || '0' : '0') : '0'; let note = '';
+        sdModal.hide(); updateLocalDashboardData(currentUser.mnv, dDisplay, bf, lu, di, ot, note);
+        if(document.getElementById('mode-vcal').classList.contains('active')) renderVcal();
+        enqueueTask({ action: 'register', user: currentUser, data: [{ date: dDisplay, breakfast: bf, lunch: lu, dinner: di, ot: ot, note: note }] }, "Đang lưu...", async (res) => { if(res.success) { showToast('Đã xóa thành công cho ' + dDisplay, 'success'); await reloadDashboardData(); } });
+    }
+
+    function submitSingleDate() {
+        let dDisplay = document.getElementById('sd-date').value; 
+        let myMeal = dashboardData.find(m => String(m.mnv) === String(currentUser.mnv) && m.date === dDisplay);
+        let bf = document.getElementById('sd-bf').disabled ? (myMeal ? myMeal.breakfast || '0' : '0') : document.getElementById('sd-bf').value; 
+        let lu = document.getElementById('sd-lu').disabled ? (myMeal ? myMeal.lunch || '0' : '0') : document.getElementById('sd-lu').value; 
+        let di = document.getElementById('sd-di').disabled ? (myMeal ? myMeal.dinner || '0' : '0') : document.getElementById('sd-di').value; 
+        let ot = document.getElementById('sd-ot').disabled ? (myMeal ? myMeal.ot || '0' : '0') : document.getElementById('sd-ot').value; 
+        let note = document.getElementById('sd-note').value;
+        
+        sdModal.hide(); updateLocalDashboardData(currentUser.mnv, dDisplay, bf, lu, di, ot, note);
+        if(document.getElementById('mode-vcal').classList.contains('active')) renderVcal();
+        enqueueTask({ action: 'register', user: currentUser, data: [{ date: dDisplay, breakfast: bf, lunch: lu, dinner: di, ot: ot, note: note }] }, "Đang lưu...", async (res) => { if(res.success) { showToast('Đã lưu thành công cho ' + dDisplay, 'success'); await reloadDashboardData(); } });
+    }
+
+    function sendMealData(mealArray) {
+        if(mealArray.length === 0) return showToast("Chưa có dữ liệu suất ăn hợp lệ để lưu!", 'danger'); selectedVcalDates.clear(); 
+        mealArray.forEach(m => { updateLocalDashboardData(m.mnv || currentUser.mnv, m.date, m.breakfast, m.lunch, m.dinner, m.ot, m.note); });
+        tempMealCache = {};
+        if(document.getElementById('mode-cycle').classList.contains('active')) renderRegGrid(); if(document.getElementById('mode-vcal').classList.contains('active')) renderVcal(); if(document.getElementById('reg-others').classList.contains('active')) renderRegOthersGrid();
+        enqueueTask({ action: 'register', user: currentUser, data: mealArray }, "Đang lưu...", async (res) => { if(res.success) { showToast("Đã lưu thành công!", 'success'); await reloadDashboardData(); } else { showToast(res.message, 'danger'); } });
+    }
+    
+    function submitGridRegistration() {
+        let mealArray = Object.values(tempMealCache).filter(m => String(m.mnv) === String(currentUser.mnv));
+        if (mealArray.length > 0) sendMealData(mealArray); else showToast("Chưa có thay đổi nào để lưu!", "danger");
+    }
+    
+    function clearVcalRegistration() { if(selectedVcalDates.size === 0) return showToast("Bạn chưa chọn ngày trên lịch!", 'danger'); document.getElementById('vc-bf').value = '0'; document.getElementById('vc-lu').value = '0'; document.getElementById('vc-di').value = '0'; document.getElementById('vc-ot').value = '0'; document.getElementById('vc-note').value = ''; submitVcalRegistration(true); }
+
+    function submitVcalRegistration(isClear = false) {
+        if(selectedVcalDates.size === 0) return showToast("Bạn chưa chọn ngày trên lịch!", 'danger');
+        let bf = document.getElementById('vc-bf').value, lu = document.getElementById('vc-lu').value, di = document.getElementById('vc-di').value, ot = document.getElementById('vc-ot').value, note = document.getElementById('vc-note').value; 
+        let mealArray = []; let errorCount = 0;
+
+        selectedVcalDates.forEach(dateStr => {
+            let box = document.querySelector(`.vcal-box[data-date="${dateStr}"]`);
+            if(box) {
+                let lockedBf = box.getAttribute('data-lockbf') === 'true', lockedLu = box.getAttribute('data-locklu') === 'true', lockedDi = box.getAttribute('data-lockdi') === 'true', lockedOt = box.getAttribute('data-lockot') === 'true';
+                if(lockedBf && lockedLu && lockedDi && lockedOt) { errorCount++; return; }
+                let myMeal = dashboardData.find(m => String(m.mnv) === String(currentUser.mnv) && m.date === dateStr);
+                let p_bf = lockedBf ? (myMeal ? myMeal.breakfast || '0' : '0') : (isClear ? '0' : bf);
+                let p_lu = lockedLu ? (myMeal ? myMeal.lunch || '0' : '0') : (isClear ? '0' : lu);
+                let p_di = lockedDi ? (myMeal ? myMeal.dinner || '0' : '0') : (isClear ? '0' : di);
+                let p_ot = lockedOt ? (myMeal ? myMeal.ot || '0' : '0') : (isClear ? '0' : ot);
+                let p_note = isClear ? '' : note;
+                if(p_bf !== '' || p_lu !== '' || p_di !== '' || p_ot !== '') mealArray.push({ date: dateStr, breakfast: p_bf, lunch: p_lu, dinner: p_di, ot: p_ot, note: p_note }); 
+            }
+        }); 
+        
+        if (errorCount > 0) showToast(`Đã bỏ qua ${errorCount} ngày do đã khóa toàn bộ!`, 'warning');
+        if (mealArray.length > 0) sendMealData(mealArray); else { selectedVcalDates.clear(); renderVcal(); }
+    }
+    
+    let copyModalObj;
+    function openCopyDateModal() { if(!copyModalObj) copyModalObj = new bootstrap.Modal(document.getElementById('copyDateModal')); document.getElementById('copy-target-date').value = ''; copyModalObj.show(); }
+    function submitCopyDate() {
+        let targetDateStr = document.getElementById('copy-target-date').value;
+        if(!targetDateStr) return showToast('Vui lòng chọn ngày đích!', 'danger'); if(targetDateStr.includes(' to ')) return showToast('Chỉ chọn 1 ngày đích!', 'danger');
+        let rows = document.querySelectorAll('#ro-grid-body tr'); let rawRequests = [];
+        rows.forEach(tr => {
+            let mnv = tr.getAttribute('data-mnv'); if(!mnv) return;
+            let bfEl = tr.querySelector('.ms-bf'), luEl = tr.querySelector('.ms-lu'), diEl = tr.querySelector('.ms-di'), otEl = tr.querySelector('.ms-ot');
+            let bf = bfEl ? bfEl.value : '0', lu = luEl ? luEl.value : '0', di = diEl ? diEl.value : '0', ot = otEl ? otEl.value : '0', note = tr.querySelector('.meal-note') ? tr.querySelector('.meal-note').value : '';
+            if(bf !== '0' || lu !== '0' || di !== '0' || ot !== '0') { rawRequests.push({ mnv: mnv, name: tr.getAttribute('data-name'), date: targetDateStr, reqBf: bf, reqLu: lu, reqDi: di, reqOt: ot, reqNote: note }); }
+        });
+        if(rawRequests.length === 0) { showToast('Không có dữ liệu suất ăn nào để copy!', 'danger'); return; }
+        if(copyModalObj) copyModalObj.hide(); processAndPreviewChanges(rawRequests);
+    }
+
+    // REG OTHERS (ĐĂNG KÝ HỘ)
+    function renderRegOthersGrid() {
+        let dStrInput = document.getElementById('ro-date').value; if(!dStrInput) return;
+        let dStr = dStrInput.split(' to ')[0], parts = dStr.split('/'), d = new Date(parts[2], parseInt(parts[1])-1, parts[0]);
+        let tbody = document.getElementById('ro-grid-body'), html = [], sText = removeAccents(document.getElementById('ro-search').value), dDisplay = toDDMMYYYY(d), sDepts = getCheckedTreeVals('ro-dept-tree'), sStatuses = getCheckedStatuses('ro'), sBpGoc = getCheckedBpGoc('ro'); 
+        document.getElementById('ro-thead').innerHTML = buildTheadHTML('ro');
+        
+        let getOpts = (val) => `<option value="0" ${val==='0'||!val?'selected':''}>O</option><option value="X" ${val==='X'?'selected':''}>X</option><option value="Y" ${val==='Y'?'selected':''}>Y</option>`;
+        let buildSel = (cls, val, disabled, mnv, dDisplay, title) => `<select class="form-select form-select-sm meal-select val-${val} ${cls}" ${disabled ? `disabled title="${title}"` : ''} onchange="updateSelectColor(this); cacheRow(this, '${mnv}', '${dDisplay}')">${getOpts(val)}</select>`;
+
+        let filteredArray = employeeData.filter(e => {
+            let matchText = (!sText) || removeAccents(e.name).includes(sText) || removeAccents(e.mnv).includes(sText); 
+            let matchDept = (sDepts.length === 0) || sDepts.includes(e.dv) || sDepts.includes(e.bp1) || sDepts.includes(e.dept_cap2) || sDepts.includes(e.bp3) || sDepts.includes(e.bp4) || sDepts.includes(e.bp5);
+            let matchBpGoc = (sBpGoc.length === 0) || sBpGoc.includes(e.bp_goc);
+            return matchText && matchDept && matchBpGoc && sStatuses.includes(e.leaveStatus);
+        });
+
+        renderPagination('ro', filteredArray.length, renderRegOthersGrid);
+        let limit = pageState.ro.limit === 'ALL' ? filteredArray.length : pageState.ro.limit; let page = pageState.ro.page;
+        let pagedData = filteredArray.slice((page - 1) * limit, page * limit); let c = (page - 1) * limit + 1;
+
+        pagedData.forEach(e => {
+            let locks = getLockStatus(d.getTime(), e.leaveDate); let mnv = e.mnv;
+            let myMeal = dashboardData.find(m => String(m.mnv) === String(mnv) && m.date === dDisplay);
+            let cache = tempMealCache[`${mnv}_${dDisplay}`];
+            let bfVal = cache ? cache.breakfast : (myMeal ? myMeal.breakfast || '0' : '0'); let luVal = cache ? cache.lunch : (myMeal ? myMeal.lunch || '0' : '0'); let diVal = cache ? cache.dinner : (myMeal ? myMeal.dinner || '0' : '0'); let otVal = cache ? cache.ot : (myMeal ? myMeal.ot || '0' : '0'); let noteVal = cache ? cache.note : (myMeal ? myMeal.note || '' : '');
+            
+            let isResigned = e.leaveStatus === 'Đã nghỉ'; if (isResigned && currentUser.role !== 'Admin_full') { locks.bf = true; locks.lu = true; locks.di = true; locks.ot = true; locks.all = true; locks.reason = 'Nhân viên đã nghỉ việc'; }
+            let trClass = isResigned ? 'row-resigned' : (locks.all ? 'row-locked' : '');
+            
+            let selBf = buildSel('ms-bf', bfVal, locks.bf, mnv, dDisplay, locks.reason); let selLu = buildSel('ms-lu', luVal, locks.lu, mnv, dDisplay, locks.reason); let selDi = buildSel('ms-di', diVal, locks.di, mnv, dDisplay, locks.reason); let selOT = buildSel('ms-ot ot-select', otVal, locks.ot, mnv, dDisplay, locks.reason);
+            let escapedNote = String(noteVal).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            let inpNote = locks.all ? `<textarea class="form-control form-control-sm border-0 meal-note" rows="1" disabled style="resize: none; overflow: hidden;" title="${locks.reason}">${escapedNote}</textarea>` : `<textarea class="form-control form-control-sm meal-note border-secondary" rows="1" style="resize: vertical; transition: all 0.2s;" onfocus="this.rows=3" onblur="this.rows=1; cacheRow(this, '${mnv}', '${dDisplay}')">${escapedNote}</textarea>`;
+            
+            html.push(`<tr class="${trClass}" data-mnv="${mnv}" data-name="${e.name}"><td ${locks.all ? `title="${locks.reason}"` : ''}>${c++}</td>${buildTbodyCols('ro', e)}<td class="align-middle">${selBf}</td><td class="align-middle">${selLu}</td><td class="align-middle">${selDi}</td><td class="align-middle ot-col">${selOT}</td><td class="align-middle">${inpNote}</td><td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="clearMealRow(this, '${mnv}', '${dDisplay}')" title="Xóa chọn dòng này" ${locks.all ? 'disabled' : ''}><i class="fa-solid fa-trash"></i></button></td></tr>`);
+        });
+        tbody.innerHTML = html.length > 0 ? html.join('') : `<tr><td colspan="${(userCols['ro']||[]).length + 6}" class="text-center text-muted">Không tìm thấy NV</td></tr>`; enforceOtSelectPermission();
+    }
+    
+    function submitRegOthersGrid() {
+        let dStrInput = document.getElementById('ro-date').value; if(!dStrInput) return showToast("Chọn ngày!", 'danger');
+        let datesToSave = getDatesInRange(dStrInput);
+        if(datesToSave.length > 1) {
+            let rows = document.querySelectorAll('#ro-grid-body tr');
+            rows.forEach(tr => {
+                let mnv = tr.getAttribute('data-mnv');
+                let bfEl = tr.querySelector('.ms-bf'), luEl = tr.querySelector('.ms-lu'), diEl = tr.querySelector('.ms-di'), otEl = tr.querySelector('.ms-ot');
+                if((!bfEl || bfEl.disabled) && (!luEl || luEl.disabled) && (!diEl || diEl.disabled) && (!otEl || otEl.disabled)) return;
+                let bf = bfEl.value || '0', lu = luEl ? luEl.value : '0', di = diEl ? diEl.value : '0', ot = otEl ? otEl.value : '0', note = tr.querySelector('.meal-note') ? tr.querySelector('.meal-note').value : '';
+                datesToSave.forEach(dateVN => { tempMealCache[`${mnv}_${dateVN}`] = { mnv: mnv, name: tr.getAttribute('data-name'), date: dateVN, breakfast: bf, lunch: lu, dinner: di, ot: ot, note: note }; });
+            });
+        }
+        let mealArray = Object.values(tempMealCache);
+        if (mealArray.length > 0) sendMealData(mealArray); else showToast("Chưa có thay đổi nào để lưu!", "danger");
+    }
+
+    // CHƯA ĐĂNG KÝ
+    function renderUnregistered() {
+        let dStrInput = document.getElementById('unreg-date').value; if(!dStrInput) return;
+        let dStart, dEnd;
+        if(dStrInput.includes(' to ')) { let parts = dStrInput.split(' to '); let p1 = parts[0].split('/'); dStart = new Date(p1[2], p1[1]-1, p1[0]); dStart.setHours(0,0,0); let p2 = parts[1].split('/'); dEnd = new Date(p2[2], p2[1]-1, p2[0]); dEnd.setHours(23,59,59); } 
+        else { let p1 = dStrInput.split('/'); dStart = new Date(p1[2], p1[1]-1, p1[0]); dStart.setHours(0,0,0); dEnd = new Date(dStart); dEnd.setHours(23,59,59); }
+
+        let sText = removeAccents(document.getElementById('unreg-search').value), sDepts = getCheckedTreeVals('unreg-dept-tree'), sStatuses = getCheckedStatuses('unreg'), sBpGoc = getCheckedBpGoc('unreg'), registeredMnvSet = new Set(), mealMapForDate = {};
+        let groupByField = document.getElementById('unreg-group-by') ? document.getElementById('unreg-group-by').value : 'dept_cap2';
+
+        dashboardData.forEach(row => {
+            let cleanDate = String(row.date).trim(); let rd; if(cleanDate.includes('/')) { let p = cleanDate.split('/'); rd = new Date(p[2], parseInt(p[1])-1, p[0], 12, 0, 0); } else { rd = new Date(cleanDate); }
+            if (rd >= dStart && rd <= dEnd) { mealMapForDate[String(row.mnv).trim()] = row; if ((row.breakfast && row.breakfast !== '0') || (row.lunch && row.lunch !== '0') || (row.dinner && row.dinner !== '0') || (row.ot && row.ot !== '0')) registeredMnvSet.add(String(row.mnv).trim()); }
+        });
+
+        let totalCounts = {}, unregCounts = {}; unregDataCache = {}; 
+        employeeData.forEach(emp => {
+            if (!sStatuses.includes(emp.leaveStatus)) return; 
+            let matchDept = (sDepts.length === 0) || sDepts.includes(emp.dv) || sDepts.includes(emp.bp1) || sDepts.includes(emp.dept_cap2) || sDepts.includes(emp.bp3) || sDepts.includes(emp.bp4) || sDepts.includes(emp.bp5);
+            let matchBpGoc = (sBpGoc.length === 0) || sBpGoc.includes(emp.bp_goc);
+            let dept = emp[groupByField] ? emp[groupByField] : 'Khác';
+
+            if (matchDept && matchBpGoc) {
+                totalCounts[dept] = (totalCounts[dept] || 0) + 1;
+                if (!unregDataCache[dept]) unregDataCache[dept] = { reg: [], unreg: [] };
+                let matchSearch = (!sText) || (removeAccents(emp.mnv).includes(sText)) || (removeAccents(emp.name).includes(sText));
+                let eMnv = String(emp.mnv).trim();
+                if (!registeredMnvSet.has(eMnv)) { unregCounts[dept] = (unregCounts[dept] || 0) + 1; if (matchSearch) unregDataCache[dept].unreg.push({ emp: emp, meal: null }); } 
+                else { if (matchSearch) unregDataCache[dept].reg.push({ emp: emp, meal: mealMapForDate[eMnv] }); }
+            }
+        }); 
+        renderUnregChart(unregCounts, totalCounts);
+    }
+
+    function renderUnregChart(unregCounts, totalCounts) {
+        let canvas = document.getElementById('unregChart'); let ctx = canvas.getContext('2d'); 
+        if (unregChartInstance) unregChartInstance.destroy();
+        
+        let labels = Object.keys(totalCounts);
+        let registeredData = labels.map(l => (totalCounts[l] || 0) - (unregCounts[l] || 0)); let unregData = labels.map(l => unregCounts[l] || 0);
+
+        let minHeight = labels.length * 40 + 150; canvas.parentElement.style.height = `max(70vh, ${minHeight}px)`;
+        let totalReg = registeredData.reduce((a, b) => a + b, 0); let totalAll = labels.map(l => totalCounts[l] || 0).reduce((a, b) => a + b, 0); let totalPct = totalAll > 0 ? Math.round((totalReg / totalAll) * 100) : 0;
+
+        const progressLabelPlugin = {
+            id: 'progressLabelPlugin',
+            afterDatasetsDraw(chart) {
+                const { ctx, data } = chart; ctx.save(); ctx.font = 'bold 12px Arial'; ctx.textBaseline = 'middle';
+                let meta = chart.getDatasetMeta(1); 
+                data.labels.forEach((label, index) => {
+                    let reg = data.datasets[0].data[index], unreg = data.datasets[1].data[index], total = reg + unreg;
+                    if (total === 0) return;
+                    let text = ` ${reg} / ${total} (${Math.round((reg / total) * 100)}%)`;
+                    if (meta.data[index]) { ctx.textAlign = 'left'; ctx.fillStyle = '#000000'; ctx.fillText(text, meta.data[index].x + 8, meta.data[index].y); }
+                }); ctx.restore();
+            }
+        };
+
+        unregChartInstance = new Chart(ctx, { 
+            type: 'bar', 
+            data: { labels: labels, datasets: [ { label: 'Đã hoàn thành', data: registeredData, backgroundColor: '#00a651', borderColor: '#007a3b', borderWidth: 1, barPercentage: 0.7 }, { label: 'Chưa đăng ký', data: unregData, backgroundColor: '#ffffff', borderColor: '#adb5bd', borderWidth: 1, barPercentage: 0.7 } ] }, 
+            plugins: [progressLabelPlugin], 
+            options: { 
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { right: 100 } },
+                scales: { x: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }, y: { stacked: true, ticks: { autoSkip: false, font: { weight: '600' } }, grid: { display: false } } }, 
+                plugins: { title: { display: true, text: `TỔNG TIẾN ĐỘ: HOÀN THÀNH ${totalReg} / ${totalAll} (${totalPct}%)`, font: { size: 16, weight: 'bold' }, color: '#00a651', padding: { bottom: 20 } }, legend: { display: true, position: 'bottom' }, tooltip: { backgroundColor: 'rgba(0, 0, 0, 0.8)', titleColor: '#ffffff', bodyColor: '#ffffff', borderWidth: 0, padding: 10, callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw; } } } }, 
+                onClick: (e, elements) => { if (elements.length > 0) { showUnregDetails(unregChartInstance.data.labels[elements[0].index]); } } 
+            } 
+        });
+    }
+
+    function showUnregDetails(dept) {
+        currentUnregDept = dept; let data = unregDataCache[dept] || { reg: [], unreg: [] }; let html = [];
+        html.push(`<tr><td colspan="7" class="bg-success bg-opacity-10 text-success fw-bold p-2 text-start fs-6"><i class="fa-solid fa-check-circle"></i> ĐÃ ĐĂNG KÝ (${data.reg.length})</td></tr>`);
+        data.reg.forEach(item => { let m = item.meal; html.push(`<tr><td class="fw-bold text-secondary align-middle">${item.emp.mnv}</td><td class="text-start fw-bold text-primary align-middle">${item.emp.name}</td><td class="align-middle">${m ? getStyledMealName(m.breakfast) : '-'}</td><td class="align-middle">${m ? getStyledMealName(m.lunch) : '-'}</td><td class="align-middle">${m ? getStyledMealName(m.dinner) : '-'}</td><td class="align-middle ot-col">${m ? getStyledMealName(m.ot) : '-'}</td><td class="text-start align-middle">${m ? (m.note || '') : ''}</td></tr>`); });
+        html.push(`<tr><td colspan="7" class="bg-danger bg-opacity-10 text-danger fw-bold p-2 text-start mt-2 fs-6"><i class="fa-solid fa-xmark-circle"></i> CHƯA ĐĂNG KÝ (${data.unreg.length})</td></tr>`);
+        data.unreg.forEach(item => { html.push(`<tr><td class="fw-bold text-secondary align-middle">${item.emp.mnv}</td><td class="text-start fw-bold text-primary align-middle">${item.emp.name}</td><td class="align-middle">-</td><td class="align-middle">-</td><td class="align-middle">-</td><td class="align-middle ot-col">-</td><td class="align-middle">-</td></tr>`); });
+        document.getElementById('modal-detail-tbody').innerHTML = html.join(''); document.getElementById('modal-summary-text').innerHTML = `Tổng: <span class="text-primary">${data.reg.length + data.unreg.length}</span> &nbsp;|&nbsp; <span class="text-success">Đã ĐK: ${data.reg.length}</span> &nbsp;|&nbsp; <span class="text-danger">Chưa ĐK: ${data.unreg.length}</span>`; document.getElementById('unregDetailsTitle').innerText = 'Chi tiết: ' + dept;
+        enforceOtSelectPermission(); new bootstrap.Modal(document.getElementById('unregDetailsModal')).show();
+    }
+    
+    function exportUnregDetailsExcel() {
+        if(!currentUnregDept) return; let data = unregDataCache[currentUnregDept] || { reg: [], unreg: [] }; let dStr = document.getElementById('unreg-date').value || '';
+        let exportData = [ ["DANH SÁCH CHI TIẾT ĐĂNG KÝ - " + currentUnregDept.toUpperCase()], ["Ngày xem:", dStr], ["Tổng số:", data.reg.length + data.unreg.length], ["Đã đăng ký:", data.reg.length], ["Chưa đăng ký:", data.unreg.length], [], ["MÃ NV", "Họ Tên", "Sáng", "Trưa", "Chiều", "Tăng ca", "Ghi chú", "Trạng thái"] ];
+        data.reg.forEach(item => { let m = item.meal; exportData.push([ item.emp.mnv, item.emp.name, m ? m.breakfast : '', m ? m.lunch : '', m ? m.dinner : '', m ? m.ot : '', m ? m.note : '', "Đã đăng ký" ]); });
+        data.unreg.forEach(item => { exportData.push([ item.emp.mnv, item.emp.name, "", "", "", "", "", "Chưa đăng ký" ]); });
+        let ws = XLSX.utils.aoa_to_sheet(exportData); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "ChiTiet"); XLSX.writeFile(wb, `DS_${currentUnregDept}.xlsx`);
+    }
+
+    async function downloadExcelTemplate(mode = 'ro') {
+        let dStrInput = document.getElementById(mode + '-date').value; if(!dStrInput) return showToast("Vui lòng chọn ngày để tải mẫu!", "danger");
+        showToast("Đang tạo file mẫu, vui lòng đợi...", "info");
+        let datesToExport = getDatesInRange(dStrInput); let sDepts = getCheckedTreeVals(mode + '-dept-tree'); let sStatuses = getCheckedStatuses(mode); let sBpGoc = getCheckedBpGoc(mode);
+        const TEMPLATE_URL = 'https://raw.githubusercontent.com/trunghieuappsheet-cell/BMMS/main/upload_suatcom_dd.mm.yy.xlsx'; 
+        try {
+            let response = await fetch(TEMPLATE_URL); if (!response.ok) throw new Error("Không thể tải file mẫu từ Server."); let buffer = await response.arrayBuffer();
+            let outWb = new ExcelJS.Workbook(); await outWb.xlsx.load(buffer);
+            let wsTemplate = outWb.worksheets[0];
+
+            for (let d = 0; d < datesToExport.length; d++) {
+                let dStr = datesToExport[d], parts = dStr.split('/'), sName = `${parts[0]}.${parts[1]}`;
+                let newSheet = outWb.addWorksheet(sName);
+                newSheet.properties = JSON.parse(JSON.stringify(wsTemplate.properties || {})); newSheet.pageSetup = JSON.parse(JSON.stringify(wsTemplate.pageSetup || {})); newSheet.views = JSON.parse(JSON.stringify(wsTemplate.views || []));
+                wsTemplate.columns.forEach((col, index) => { let newCol = newSheet.getColumn(index + 1); if(col.width) newCol.width = col.width; if(col.hidden) newCol.hidden = col.hidden; if(col.style) newCol.style = col.style; });
+                wsTemplate.eachRow({ includeEmpty: true }, (row, rowNumber) => { if (rowNumber <= 6) { let newRow = newSheet.getRow(rowNumber); newRow.height = row.height; row.eachCell({ includeEmpty: true }, (cell, colNumber) => { let newCell = newRow.getCell(colNumber); newCell.value = cell.value; newCell.style = cell.style; }); } });
+                if (wsTemplate.model.merges) { wsTemplate.model.merges.forEach(m => { try { newSheet.mergeCells(m); } catch(e){} }); }
+                
+                let filteredEmps = employeeData.filter(e => { return ((sDepts.length === 0) || sDepts.includes(e.dv) || sDepts.includes(e.bp1) || sDepts.includes(e.dept_cap2) || sDepts.includes(e.bp3) || sDepts.includes(e.bp4) || sDepts.includes(e.bp5)) && ((sBpGoc.length === 0) || sBpGoc.includes(e.bp_goc)) && sStatuses.includes(e.leaveStatus); });
+                let uniqueDepts = [...new Set(filteredEmps.map(e => e.dept_cap2 || e.bp1))].filter(Boolean); let deptPath = uniqueDepts.length === 1 && sDepts.length === 1 ? uniqueDepts[0] : "Cơ sở Phú Quốc";
+                newSheet.getCell('B2').value = deptPath; newSheet.getCell('B3').value = `${parts[0]}.${parts[1]}.${parts[2]}`;
+                
+                let currentRow = 7; let c = 1;
+                filteredEmps.forEach(e => {
+                    let myMeal = dashboardData.find(m => String(m.mnv) === String(e.mnv) && m.date === dStr);
+                    let bf = (myMeal && myMeal.breakfast && myMeal.breakfast !== '0') ? myMeal.breakfast : ""; let lu = (myMeal && myMeal.lunch && myMeal.lunch !== '0') ? myMeal.lunch : ""; let di = (myMeal && myMeal.dinner && myMeal.dinner !== '0') ? myMeal.dinner : ""; let ot = (myMeal && myMeal.ot && myMeal.ot !== '0') ? myMeal.ot : ""; let note = myMeal ? (myMeal.note || "") : "";
+                    let rowVals = [ c++, e.mnv, e.name, e.company, e.bp_goc, e.dept_cap2, bf, lu, di, ot, note ];
+                    rowVals.forEach((val, i) => { let cell = newSheet.getCell(currentRow, i + 1); cell.value = val; cell.style = wsTemplate.getCell(7, i + 1).style; });
+                    currentRow++;
+                });
+            }
+            outWb.removeWorksheet(wsTemplate.id);
+            const outBuffer = await outWb.xlsx.writeBuffer();
+            function formatDateForFile(dStr) { let p = dStr.split('/'); return `${p[0]}.${p[1]}.${p[2].substring(2)}`; }
+            let fname = datesToExport.length > 1 ? `${formatDateForFile(datesToExport[0])}-${formatDateForFile(datesToExport[datesToExport.length-1])}` : formatDateForFile(datesToExport[0]);
+            saveAs(new Blob([outBuffer]), `upload_suatcom_${fname}.xlsx`); showToast("Đã tải file mẫu thành công!", "success");
+        } catch (error) { showToast("Lỗi khi tải file mẫu! Vui lòng kiểm tra lại mạng hoặc link.", "danger"); }
+    }
+
+    function handleExcelUpload(event) {
+        let file = event.target.files[0]; if(!file) return; let reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                let data = new Uint8Array(e.target.result), workbook = XLSX.read(data, {type: 'array'});
+                let rawRequests = [], errors = [];
+                const ignoreSheets = ["Hiệu chỉnh", "Thực tế", "Ăn Sang", "Ăn Trưa", "Ăn Tối", "Tăng Ca", "Tổng hợp"];
+                
+                workbook.SheetNames.forEach(sheetName => {
+                    if (ignoreSheets.includes(sheetName) || sheetName.trim() === "dd.mm.yy") return;
+                    let worksheet = workbook.Sheets[sheetName]; let jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                    let dStrB3 = ''; if(jsonData[2] && jsonData[2][1]) { let rawD = String(jsonData[2][1]).trim(); if (rawD.includes('.')) dStrB3 = rawD.split('.').join('/'); else dStrB3 = rawD; }
+                    if (!dStrB3 || dStrB3.length < 8) return;
+
+                    for(let i = 6; i < jsonData.length; i++) {
+                        let row = jsonData[i]; if(!row || row.length === 0 || !row[1]) continue; if(String(row[1]).includes("MÃ NV")) continue; 
+                        let mnv = String(row[1]).trim(), emp = employeeData.find(e => String(e.mnv) === mnv); 
+                        if(!emp) { errors.push(`Sheet ${sheetName} - Dòng ${i+1} (${mnv}): Không tìm thấy Mã NV.`); continue; }
+                        
+                        let bf = mapExcelMealValue(row[6]), lu = mapExcelMealValue(row[7]), di = mapExcelMealValue(row[8]), ot = mapExcelMealValue(row[9]), note = row[10] ? String(row[10]).trim() : '';
+                        if(bf === 'INVALID' || lu === 'INVALID' || di === 'INVALID' || ot === 'INVALID') { errors.push(`Sheet ${sheetName} - Dòng ${i+1} (${mnv}): Giá trị không hợp lệ.`); continue; }
+
+                        rawRequests.push({ mnv: mnv, name: emp.name, date: dStrB3, reqBf: bf, reqLu: lu, reqDi: di, reqOt: ot, reqNote: note });
+                    }
+                });
+
+                event.target.value = ""; 
+                if(errors.length > 0) alert("Phát hiện " + errors.length + " lỗi định dạng:\n\n" + errors.slice(0, 15).join("\n") + "\n\nSẽ tiếp tục xử lý các dòng hợp lệ...");
+                if(rawRequests.length > 0) processAndPreviewChanges(rawRequests); else showToast("File rỗng hoặc không có ngày hợp lệ.", "danger"); 
+            } catch(err) { showToast("Đã xảy ra lỗi đọc file Excel!", "danger"); }
+        }; reader.readAsArrayBuffer(file);
+    }
+    
+    function mapExcelMealValue(val) { if(val === undefined || val === null || val === '') return '0'; let v = String(val).trim().toUpperCase(); if(v === '0' || v === 'O' || v === '-') return '0'; if(v === 'X' || v === 'Y') return v; return 'INVALID'; }
+
+    let pendingSubmitData = [];
+
+    function processAndPreviewChanges(rawRequests) {
+        let tbody = document.getElementById('preview-changes-tbody'); tbody.innerHTML = ''; pendingSubmitData = []; let html = []; let hasChanges = false;
+        rawRequests.forEach(req => {
+            let mnv = req.mnv; let emp = employeeData.find(e => String(e.mnv) === String(mnv)) || { name: req.name, leaveDate: '' };
+            let dTime = parseToDateObj(req.date).getTime(); let locks = getLockStatus(dTime, emp.leaveDate);
+            
+            let myMeal = dashboardData.find(m => String(m.mnv) === String(mnv) && m.date === req.date);
+            let exBf = myMeal ? (myMeal.breakfast || '0') : '0'; let exLu = myMeal ? (myMeal.lunch || '0') : '0'; let exDi = myMeal ? (myMeal.dinner || '0') : '0'; let exOt = myMeal ? (myMeal.ot || '0') : '0'; let exNote = myMeal ? (myMeal.note || '') : '';
+
+            let finalBf = locks.bf ? exBf : req.reqBf; let finalLu = locks.lu ? exLu : req.reqLu; let finalDi = locks.di ? exDi : req.reqDi; let finalOt = locks.ot ? exOt : req.reqOt; let finalNote = locks.all ? exNote : req.reqNote; 
+            
+            let bfBlocked = locks.bf && req.reqBf !== exBf; let luBlocked = locks.lu && req.reqLu !== exLu; let diBlocked = locks.di && req.reqDi !== exDi; let otBlocked = locks.ot && req.reqOt !== exOt;
+            let isBfChanged = finalBf !== exBf; let isLuChanged = finalLu !== exLu; let isDiChanged = finalDi !== exDi; let isOtChanged = finalOt !== exOt; let isNoteChanged = finalNote !== exNote;
+
+            if (isBfChanged || isLuChanged || isDiChanged || isOtChanged || isNoteChanged || bfBlocked || luBlocked || diBlocked || otBlocked) {
+                hasChanges = true;
+                pendingSubmitData.push({ mnv: mnv, name: emp.name, date: req.date, breakfast: finalBf, lunch: finalLu, dinner: finalDi, ot: finalOt, note: finalNote });
+                
+                let renderDisplay = (reqV, finalV, exV, isBlocked) => {
+                    let textReq = reqV === '0' ? 'O' : reqV; let textFin = finalV === '0' ? 'O' : finalV; let textEx = exV === '0' ? 'O' : exV;
+                    if (isBlocked) return `<span class="text-danger text-decoration-line-through fw-bold" title="Bị khóa">${textReq}</span><br><span class="badge bg-secondary" style="font-size:0.7em;">Giữ cũ: ${textEx}</span>`;
+                    if (reqV !== exV) return `<span class="badge bg-success fs-6">${textFin}</span>`;
+                    return textFin;
+                };
+
+                html.push(`<tr><td class="fw-bold">${mnv}</td><td class="text-start text-primary fw-bold">${emp.name}</td><td class="text-success fw-bold">${req.date}</td>
+                    <td>${renderDisplay(req.reqBf, finalBf, exBf, locks.bf)}</td><td>${renderDisplay(req.reqLu, finalLu, exLu, locks.lu)}</td><td>${renderDisplay(req.reqDi, finalDi, exDi, locks.di)}</td><td class="ot-col">${renderDisplay(req.reqOt, finalOt, exOt, locks.ot)}</td>
+                    <td class="text-start">${finalNote !== exNote ? `<span class="badge bg-success">${finalNote || '(Xóa ghi chú)'}</span>` : finalNote}</td></tr>`);
+            }
+        });
+
+        if (!hasChanges) { showToast("Không có thay đổi hợp lệ nào so với dữ liệu hiện tại trên hệ thống!", "warning"); return; }
+        tbody.innerHTML = html.join(''); new bootstrap.Modal(document.getElementById('previewChangesModal')).show(); enforceOtSelectPermission();
+    }
+
+    function confirmPendingChanges() {
+        if(pendingSubmitData.length === 0) return;
+        bootstrap.Modal.getInstance(document.getElementById('previewChangesModal')).hide();
+        sendMealData(pendingSubmitData); pendingSubmitData = [];
+    }
+
+    (function() {
+        let style = document.createElement('style');
+        style.innerHTML = `
+            .vcal-box.today::before { display: none !important; }
+            .vcal-box .date-text { display: inline-block; padding: 2px 8px; border-radius: 12px; }
+            .vcal-box.today .date-text { background-color: var(--bim-green); color: white; }
+            select:disabled, input:disabled, textarea:disabled { background-color: #e9ecef !important; color: #6c757d !important; cursor: not-allowed; opacity: 1; border-color: #ced4da !important; }
+        `;
+        document.head.appendChild(style);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            ['vc-bf', 'vc-lu', 'vc-di', 'vc-ot', 'sd-bf', 'sd-lu', 'sd-di', 'sd-ot'].forEach(id => {
+                let el = document.getElementById(id);
+                if (el) { el.classList.add('meal-select'); el.addEventListener('change', function() { updateSelectColor(this); }); }
+            });
+        });
+    })();
+
+    function updateRightPanelLocks() {
+        let lockBf = false, lockLu = false, lockDi = false, lockOt = false;
+        if (selectedVcalDates.size > 0) {
+            selectedVcalDates.forEach(dateStr => {
+                let box = document.querySelector(`.vcal-box[data-date="${dateStr}"]`);
+                if (box) {
+                    if (box.getAttribute('data-lockbf') === 'true') lockBf = true;
+                    if (box.getAttribute('data-locklu') === 'true') lockLu = true;
+                    if (box.getAttribute('data-lockdi') === 'true') lockDi = true;
+                    if (box.getAttribute('data-lockot') === 'true') lockOt = true;
+                }
+            });
+        }
+        
+        let bfEl = document.getElementById('vc-bf'), luEl = document.getElementById('vc-lu'), diEl = document.getElementById('vc-di'), otEl = document.getElementById('vc-ot');
+        if (bfEl) { bfEl.disabled = lockBf; if (lockBf) { bfEl.value = '0'; updateSelectColor(bfEl); } }
+        if (luEl) { luEl.disabled = lockLu; if (lockLu) { luEl.value = '0'; updateSelectColor(luEl); } }
+        if (diEl) { diEl.disabled = lockDi; if (lockDi) { diEl.value = '0'; updateSelectColor(diEl); } }
+        
+        if (otEl) {
+            let isStaff = currentUser && !['admin_full', 'admin_bp'].includes(String(currentUser.role).trim().toLowerCase());
+            if (isStaff) { otEl.disabled = true; otEl.value = '0'; updateSelectColor(otEl); otEl.style.backgroundColor = '#e9ecef'; otEl.style.cursor = 'not-allowed'; } 
+            else { otEl.disabled = lockOt; otEl.style.backgroundColor = lockOt ? '#e9ecef' : ''; otEl.style.cursor = lockOt ? 'not-allowed' : 'pointer'; if (lockOt) { otEl.value = '0'; updateSelectColor(otEl); } }
+        }
+    }
+</script>
+</body>
+</html>	
